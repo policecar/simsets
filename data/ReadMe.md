@@ -1,14 +1,12 @@
-
 ## simsets
 
-Input data: subject verb object (SVO) snippets from Google's syntactic n-grams as well as their flipped cousins object verb subject (OVS).
-
-Context: there are contexts of single nouns and context between noun pairs. Noun pairs are denoted (X,Y) and analogously the first noun aka left argument is named X, the right one Y.
+Background: 'Subject verb object' (SVO) snippets from [Google's syntactic n-grams](https://commondatastorage.googleapis.com/books/syntactic-ngrams/index.html) as well as their flipped version 'object verb subject' (OVS) were used to compute context and similarity features for the [BLESS noun pairs](https://sites.google.com/site/geometricalmodels/shared-evaluation) using the [JoBim framework](http://sourceforge.net/projects/jobimtext/).  
 
 Directory structure:
 
-ctx/ 		the word contexts used ( cf. distributional similarity ). for single words ( w1, w2 ) 
-			and for word pairs ( pairs ) respectively.
-sim/ 		similar words and word pairs for single words and word pairs respectively
-lda/ 		topic model of the data
-bless/ 		labeled word pairs
+dir | content
+:----|:-----
+ctx | the word contexts used ( cf. [statistical semantics](http://aclweb.org/aclwiki/index.php?title=Statistical_Semantics) ) for single words ( w1, w2 ) and for word pairs ( pairs ) respectively
+sim | similar words resp. word pairs
+lda | topic model of the data
+bless | labeled word pairs
