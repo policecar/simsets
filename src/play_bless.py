@@ -1,202 +1,204 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
 Created on Wed Apr  9 13:44:30 2014
 
 @author: stevo
+@author: priska
 """
 
-from __future__ import print_function;
-from __future__ import division;
-import logging;
-import text_entail.matrix as tm;
-import text_entail.dictionary as td;
-import text_entail.classify as tc;
-import scipy.sparse as sparse;
-import numpy as np;
+from __future__ import print_function
+from __future__ import division
 
-#basedir =               '/home/steffen/data/bless/';
-basedir =               '/Users/stevo/Workspaces/rumblejungle/n2n/data/bless/';
+import logging, os
+import scipy.sparse as sparse
+import numpy as np
 
-labels =                basedir + 'BLESS_nouns_hyper_vs_all.tsv';
+import text_entail.matrix as tm
+import text_entail.dictionary as td
+import text_entail.classify as tc
 
-svo_counts =            basedir + 'dt/svo_invert.counts_lmi_pruned.relations_filtered.txt.gz';
-svo_flipped_counts =    basedir + 'dt/svo_invert.counts_lmi_pruned.relations_flipped_filtered.txt.gz';
+from IPython import embed
 
-svo_dt =                basedir + 'dt/svo_invert.dt.relations_filtered.txt.gz';
-svo_flipped_dt =        basedir + 'dt/svo_invert.dt.relations_flipped_filtered.txt.gz';
+#BASE_DIR   = '/Users/stevo/Workspaces/rumblejungle/n2n/data/bless/';
+BASE_DIR    = '/Users/pi/data/tehsis/simsets/'
 
-svo_lda_w2t =           basedir + 'dt/svo_invert.dt.relations.lda_5_5/model-final.doc2topic_';
-svo_flipped_lda_w2t =   basedir + 'dt/svo_invert.dt.relations_flipped.lda_5_5/model-final.doc2topic_';
+fn_labels   = os.path.join( BASE_DIR, 'bless/bless_nouns_hyper_vs_rest.tsv' )
+fn_ctx_word = os.path.join( BASE_DIR, 'ctx/svo_lmi_pruned' )
+fn_ctx_pair = os.path.join( BASE_DIR, 'ctx/svo_lmi_pruned_flipped' )
+fn_sim_word = os.path.join( BASE_DIR, 'sim/svo' )
+fn_sim_pair = os.path.join( BASE_DIR, 'sim/svo_flipped' )
+fn_lda_word = os.path.join( BASE_DIR, 'lda/model_final_doc2topic_5_5_' )
+fn_lda_pair = os.path.join( BASE_DIR, 'lda/model_final_doc2topic_5_5_flipped_' )
 
 
-reload(logging); logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.DEBUG)
+# instantiate logger
+reload( logging )
+logging.basicConfig( format='%(asctime)s - %(message)s', level=logging.DEBUG )
 
-logging.info('loading true labels');
-true_labels, d_triples = tm.arg_l_arg_r_pairs_vector(\
-    labels, file_contains_context=False, has_header=False);
-    
-    
-## relation pair features
-logging.info('loading paths between argument pairs');
-d_paths = td.Dict();
-mat_paths = tm.arg_l_arg_r_asjo_matrix(d_triples._rtuple2ids, \
-    svo_flipped_counts,\
-    len(d_triples),
-    col_indices = d_paths, \
-    mmfile_presuffix='.paths', reload=False);
+logging.info( 'loading ( BLESS ) labels from file' )
+y_true, d_triples = tm.arg_l_arg_r_pairs_vector( fn_labels, \
+    file_contains_context=False, has_header=False )
 
-logging.info('loading similar argument pairs');
-d_sim_pairs = td.Dict();
-mat_sim_pairs = tm.arg_l_arg_r_asjo_matrix(d_triples._rtuple2ids, \
-    svo_flipped_dt,\
-    len(d_triples),
-    col_indices = d_sim_pairs, \
-    transform_w2sig=lambda w2sig: sorted(list(w2sig), key=lambda x: float(x[1]), reverse=True)[:20],\
-    mmfile_presuffix='.simpairs', reload=False);
+num_triples = len( d_triples )  # could even be shortened to n, i guess
 
-## context features
-logging.info('loading argument context matrices');
-d_ctx = td.Dict();
-mat_arg_l_ctx = tm.arg_asjo_matrix(d_triples._m2ids,\
-    d_ctx,
-    svo_counts,\
-    len(d_triples),\
-    transform_w2sig=lambda w2sig: sorted(list(w2sig), key=lambda x: float(x[1]), reverse=True)[:20],\
-    mmfile_presuffix='.ctx_w1', reload=False);
+logging.info( 'loading context features for pairs' );
+d_ctx_pair = td.Dict();
+m_ctx_pair = tm.arg_l_arg_r_asjo_matrix( d_triples._rtuple2ids, fn_ctx_pair, 
+    num_triples, col_indices=d_ctx_pair, mmfile_presuffix='_pairs', reload=False )
+
+logging.info( 'loading similar word pairs' )
+d_sim_pair = td.Dict()
+m_sim_pair = tm.arg_l_arg_r_asjo_matrix( d_triples._rtuple2ids, fn_sim_pair, 
+    num_triples, col_indices = d_sim_pair, 
+    transform_w2sig=lambda w2sig: sorted( list(w2sig), key=lambda x: float( x[1] ), reverse=True )[:20],
+    mmfile_presuffix='_pairs', reload=False )
+
+logging.info( 'loading context features for single words' );
+d_ctx_word = td.Dict();
+m_ctx_w1 = tm.arg_asjo_matrix(d_triples._m2ids, d_ctx_word, fn_ctx_word, num_triples,
+    transform_w2sig=lambda w2sig: sorted( list( w2sig ), key = lambda x: float( x[1] ), reverse=True )[:20],
+    mmfile_presuffix='_w1', reload=False )
  
-mat_arg_r_ctx = tm.arg_asjo_matrix(d_triples._r2ids,\
-    d_ctx,
-    svo_counts,\
-    len(d_triples),\
-    transform_w2sig=lambda w2sig: sorted(list(w2sig), key=lambda x: float(x[1]), reverse=True)[:20],\
-    mmfile_presuffix='.ctx_arg_w1', reload=False);
+m_ctx_w2 = tm.arg_asjo_matrix(d_triples._r2ids, d_ctx_word, fn_ctx_word, num_triples, 
+    transform_w2sig = lambda w2sig: sorted( list( w2sig ), key = lambda x: float( x[1] ), reverse=True )[:20], 
+    mmfile_presuffix='_w2', reload=False )
 
-## create some extra matrices
-logging.info('creating argument context intersection and set minus matrices.');
-# adjust dimensions, in case they are different
-if mat_arg_l_ctx.shape[1] < mat_arg_r_ctx.shape[1]:
-    if sparse.isspmatrix_coo(mat_arg_l_ctx):
-        mat_arg_l_ctx = mat_arg_l_ctx.todok();
-    mat_arg_l_ctx.resize(mat_arg_r_ctx.shape);
-if mat_arg_r_ctx.shape[1] < mat_arg_l_ctx.shape[1]:
-    if sparse.isspmatrix_coo(mat_arg_r_ctx):
-        mat_arg_r_ctx = mat_arg_r_ctx.todok();
-    mat_arg_r_ctx.resize(mat_arg_l_ctx.shape);
+# adjust ( context ) matrix dimensions, if they vary
+if m_ctx_w1.shape[1] < m_ctx_w2.shape[1]:
+    if sparse.isspmatrix_coo(m_ctx_w1):
+        m_ctx_w1 = m_ctx_w1.todok()
+    m_ctx_w1.resize(m_ctx_w2.shape)
 
-if not sparse.isspmatrix_coo(mat_arg_l_ctx):
-    mat_arg_l_ctx = mat_arg_l_ctx.tocoo();
-if not sparse.isspmatrix_coo(mat_arg_r_ctx):
-    mat_arg_r_ctx = mat_arg_r_ctx.tocoo();
+if m_ctx_w2.shape[1] < m_ctx_w1.shape[1]:
+    if sparse.isspmatrix_coo(m_ctx_w2):
+        m_ctx_w2 = m_ctx_w2.todok()
+    m_ctx_w2.resize(m_ctx_w1.shape)
 
-mat_arg_l_ctx = mat_arg_l_ctx.astype(bool);
-mat_arg_r_ctx = mat_arg_r_ctx.astype(bool);
+if not sparse.isspmatrix_coo(m_ctx_w1):
+    m_ctx_w1 = m_ctx_w1.tocoo()
+if not sparse.isspmatrix_coo(m_ctx_w2):
+    m_ctx_w2 = m_ctx_w2.tocoo()
 
-mat_arg_union_ctx = mat_arg_l_ctx + mat_arg_r_ctx;
-mat_arg_diff_ctx = mat_arg_l_ctx != mat_arg_r_ctx;
-mat_arg_inters_ctx = mat_arg_union_ctx - mat_arg_diff_ctx;
-mat_arg_l_minus_r_ctx = mat_arg_union_ctx - mat_arg_r_ctx;
-mat_arg_r_minus_l_ctx = mat_arg_union_ctx - mat_arg_l_ctx;
+logging.info( "computing set operations on context matrices " )
+mb_ctx_w1 = m_ctx_w1.astype( bool )
+mb_ctx_w2 = m_ctx_w2.astype( bool )
 
-## topic features
-logging.info('loading lda feature matrices.')
-mat_topic = tm.arg_l_arg_r_to_topic_matrix(d_triples._rtuple2ids,\
-    svo_flipped_lda_w2t,\
-    len(d_triples), \
-    mmfile_presuffix='.bless.topic_pairs', reload=False);
+# embed()
+
+# TEUXDEUX: for all boolean matrices, substitute m_ with mb_ for a prefix
+
+m_ctx_word_union        = mb_ctx_w1 + mb_ctx_w2
+m_ctx_word_diff         = mb_ctx_w1 != mb_ctx_w2
+m_ctx_word_intersect    = m_ctx_word_union - m_ctx_word_diff
+m_ctx_minus_w1_w2       = m_ctx_word_union - mb_ctx_w2
+m_ctx_minus_w2_w1       = m_ctx_word_union - mb_ctx_w1
+
+logging.info( 'loading topic features ( LDA ) for words and word pairs' )
+m_topic_pair = tm.arg_l_arg_r_to_topic_matrix( d_triples._rtuple2ids, fn_lda_pair, 
+    num_triples, mmfile_presuffix='_pairs', reload=False )
     
-mat_arg_l_topic = tm.arg_to_topic_matrix(d_triples._m2ids,\
-    svo_lda_w2t,\
-    len(d_triples),\
-    mmfile_presuffix='.bless.topic_w1', reload=False);
+m_topic_w1 = tm.arg_to_topic_matrix( d_triples._m2ids, fn_lda_word, 
+    num_triples, mmfile_presuffix='_w1', reload=False )
 
-mat_arg_r_topic = tm.arg_to_topic_matrix(d_triples._r2ids,\
-    svo_lda_w2t,\
-    len(d_triples),\
-    mmfile_presuffix='.bless.topic_w2', reload=False);
+m_topic_w2 = tm.arg_to_topic_matrix( d_triples._r2ids, fn_lda_word, 
+    num_triples, mmfile_presuffix='_w2', reload=False )
 
-# distributionally similar args for each arg
-logging.info('loading similar arguments.')
-d_arg = td.Dict();
-mat_sim_arg_l = tm.arg_asjo_matrix(d_triples._m2ids,\
-    d_arg,
-    svo_dt,\
-    len(d_triples),\
-    transform_w2sig = lambda w2sig: sorted(list(w2sig), key=lambda x: float(x[1]), reverse=True)[:20], \
-    mmfile_presuffix='.sim_w1', reload=False);
+logging.info( 'loading distributionally similar words' )
+d_sim_word = td.Dict();
+m_sim_w1 = tm.arg_asjo_matrix(d_triples._m2ids, d_sim_word, fn_sim_word, num_triples,
+    transform_w2sig = lambda w2sig: sorted(list(w2sig), key=lambda x: float(x[1]), reverse=True)[:20], 
+    mmfile_presuffix='_w1', reload=False )
 
-mat_sim_arg_r = tm.arg_asjo_matrix(d_triples._r2ids,\
-    d_arg,
-    svo_dt,\
-    len(d_triples),\
-    transform_w2sig = lambda w2sig: sorted(list(w2sig), key=lambda x: float(x[1]), reverse=True)[:20], \
-    mmfile_presuffix='.sim_w2', reload=False);
+m_sim_w2 = tm.arg_asjo_matrix(d_triples._r2ids, d_sim_word, fn_sim_word, num_triples, 
+    transform_w2sig = lambda w2sig: sorted(list(w2sig), key=lambda x: float(x[1]), reverse=True)[:20],
+    mmfile_presuffix='_w2', reload=False )
 
-## create some extra matrices
-logging.info('creating similar arguments intersection and set minus matrices.');
-# adjust dimensions, in case they are different
-if mat_sim_arg_l.shape[1] < mat_sim_arg_r.shape[1]:
-    if sparse.isspmatrix_coo(mat_sim_arg_l):
-        mat_sim_arg_l = mat_sim_arg_l.todok();
-    mat_sim_arg_l.resize(mat_sim_arg_r.shape);
-if mat_sim_arg_r.shape[1] < mat_sim_arg_l.shape[1]:
-    if sparse.isspmatrix_coo(mat_sim_arg_r):
-        mat_sim_arg_r = mat_sim_arg_r.todok();
-    mat_sim_arg_r.resize(mat_sim_arg_l.shape);    
+# adjust ( similarity ) matrix dimensions, if they vary
+if m_sim_w1.shape[1] < m_sim_w2.shape[1]:
+    if sparse.isspmatrix_coo(m_sim_w1):
+        m_sim_w1 = m_sim_w1.todok();
+    m_sim_w1.resize(m_sim_w2.shape);
+if m_sim_w2.shape[1] < m_sim_w1.shape[1]:
+    if sparse.isspmatrix_coo(m_sim_w2):
+        m_sim_w2 = m_sim_w2.todok();
+    m_sim_w2.resize(m_sim_w1.shape);    
 
-if not sparse.isspmatrix_coo(mat_sim_arg_l):
-    mat_sim_arg_l = mat_sim_arg_l.tocoo();
-if not sparse.isspmatrix_coo(mat_sim_arg_r):
-    mat_sim_arg_r = mat_sim_arg_r.tocoo();
+if not sparse.isspmatrix_coo(m_sim_w1):
+    m_sim_w1 = m_sim_w1.tocoo();
+if not sparse.isspmatrix_coo(m_sim_w2):
+    m_sim_w2 = m_sim_w2.tocoo();
     
-mat_sim_arg_l = mat_sim_arg_l.astype(bool);
-mat_sim_arg_r = mat_sim_arg_r.astype(bool);
+logging.info( "computing set operations on similarity matrices" )
+mb_sim_w1 = m_sim_w1.astype( bool )
+mb_sim_w2 = m_sim_w2.astype( bool )
 
-mat_sim_union_arg = mat_sim_arg_l + mat_sim_arg_r;
-mat_sim_diff_arg = mat_sim_arg_l != mat_sim_arg_r;
-mat_sim_inters_arg = mat_sim_union_arg - mat_sim_diff_arg;
-mat_sim_l_minus_r_arg = mat_sim_union_arg - mat_sim_arg_r;
-mat_sim_r_minus_l_arg = mat_sim_union_arg - mat_sim_arg_l;
+m_sim_word_union = mb_sim_w1 + mb_sim_w2;
+m_sim_word_diff = mb_sim_w1 != mb_sim_w2;
+m_sim_word_intersect = m_sim_word_union - m_sim_word_diff;
+m_sim_minus_w1_w2 = m_sim_word_union - mb_sim_w2;
+m_sim_minus_w2_w1 = m_sim_word_union - mb_sim_w1;
 
-logging.info('stacking matrices.');
-# stack only two matrices at a time because of memory issues, initialize with (num_rows x 1) matrix which must be removed later again
-mat = sparse.csr_matrix((len(d_triples),1),dtype=np.float64);
+logging.info( 'stacking matrices' )
+# stack only two matrices at a time because of memory issues, 
+# initialize with ( num_rows x 1 ) matrix which must be removed later again
+mat = sparse.csr_matrix(( num_triples, 1 ), dtype=np.float64 )
 
-#### feat. between arg_l and arg_r
-#mat = sparse.hstack((mat, mat_paths));
-#mat = sparse.hstack((mat, mat_sim_pairs));
-#### context feat. of arg_l and arg_r individually
-mat = sparse.hstack((mat, mat_arg_l_ctx.astype(np.float64)));
-#mat = sparse.hstack((mat, mat_arg_r_ctx.astype(np.float64)));
-#mat = sparse.hstack((mat, mat_arg_union_ctx.astype(np.float64)));
-#mat = sparse.hstack((mat, mat_arg_diff_ctx.astype(np.float64)));
-#mat = sparse.hstack((mat, mat_arg_inters_ctx.astype(np.float64)));
-#mat = sparse.hstack((mat, mat_arg_l_minus_r_ctx.astype(np.float64)));
-#mat = sparse.hstack((mat, mat_arg_r_minus_l_ctx.astype(np.float64)));
-#### topic feat. of arg_l and arg_r
-#mat = sparse.hstack((mat, mat_topic));
-#mat = sparse.hstack((mat, mat_arg_l_topic));
-#mat = sparse.hstack((mat, mat_arg_r_topic)).tocsr();
-#### similarity feat. of arg_l and arg_r individually
-#mat = sparse.hstack((mat, mat_sim_arg_l.astype(np.float64)));
-#mat = sparse.hstack((mat, mat_sim_arg_r.astype(np.float64)));
-#mat = sparse.hstack((mat, mat_sim_union_arg.astype(np.float64)));
-#mat = sparse.hstack((mat, mat_sim_diff_arg.astype(np.float64)));
-#mat = sparse.hstack((mat, mat_sim_inters_arg .astype(np.float64)));
-#mat = sparse.hstack((mat, mat_sim_l_minus_r_arg.astype(np.float64)));
-#mat = sparse.hstack((mat, mat_sim_r_minus_l_arg.astype(np.float64)));
+# context and similarity features for word pairs
+#mat = sparse.hstack(( mat, m_ctx_pair ));
+#mat = sparse.hstack(( mat, m_sim_pair ));
+
+# context features of each word by itself
+# mat = sparse.hstack(( mat, mb_ctx_w1.astype( np.float64 )));
+mat = sparse.hstack(( mat, mb_ctx_w2.astype( np.float64 )));
+#mat = sparse.hstack(( mat, m_ctx_word_union.astype( np.float64 )));
+# mat = sparse.hstack(( mat, m_ctx_word_diff.astype( np.float64 )));
+# mat = sparse.hstack(( mat, m_ctx_word_intersect.astype( np.float64 )));
+# mat = sparse.hstack(( mat, m_ctx_minus_w1_w2.astype( np.float64 )));
+# mat = sparse.hstack(( mat, m_ctx_minus_w2_w1.astype( np.float64 )));
+
+# topic features for words and for word pairs
+#mat = sparse.hstack(( mat, m_topic_pair ))
+#mat = sparse.hstack(( mat, m_topic_w1 ))
+#mat = sparse.hstack(( mat, m_topic_w2 )).tocsr() # why here tocsr() !?
+
+# similarity features for each word by itself
+#mat = sparse.hstack(( mat, mb_sim_w1.astype( np.float64 )));
+#mat = sparse.hstack(( mat, mb_sim_w2.astype( np.float64 )));
+#mat = sparse.hstack(( mat, m_sim_word_union.astype( np.float64 )));
+#mat = sparse.hstack(( mat, m_sim_word_diff.astype( np.float64 )));
+#mat = sparse.hstack(( mat, m_sim_word_intersect.astype( np.float64 )));
+#mat = sparse.hstack(( mat, m_sim_minus_w1_w2.astype( np.float64 )));
+#mat = sparse.hstack(( mat, m_sim_minus_w2_w1.astype( np.float64 )));
+
+# pairs <set operation> single noun
 
 random_seed = 623519;
-#random_seed = 234123;
+# random_seed = 234123;
 
-mat = mat.tocsr()[:,1:];
-model = tc.run_classification_test(mat, true_labels, binarize=True, percentage_train=0.8, print_train_test_set_stat=True, test_thresholds=False, random_seed=random_seed);
-#model = tc.run_classification_test(mat.tocsr()[:,1:], true_labels, binarize=True, percentage_train=0.8, print_train_test_set_stat=True, test_thresholds=False, random_seed=random_seed);
-#names = d_ctx._id2w
-#l = zip(names, model.coef_[0])
-#ls = sorted(l, reverse=True, key= lambda x: x[1]);
+# TEUXDEUX make sure test and training set do no overlap
+# TEUXDEUX check if priors are taken into consideration
+# TEUXDEUX check how stevo computes TN, FN, TN, FN
 
-#interesting_id = 10;
-#names = d_ctx._id2w
-#x = zip(names, np.squeeze(np.array(mat[interesting_id,:].todense())));
-#x = sorted([(x,i) for (i, x) in enumerate(x) if x[1] > 0], key= lambda x: x[0][1], reverse=True);
+logging.info( "training classifier and predicting labels" )
+mat = mat.tocsr()[:,1:]
+model = tc.run_classification_test( mat, y_true, 
+    binarize = True, 
+    percentage_train = 0.8, 
+    print_train_test_set_stat = True, 
+    test_thresholds = False, 
+    random_seed = random_seed 
+)
+# model = tc.run_classification_test(mat.tocsr()[:,1:], y_true, \
+#   binarize=True, percentage_train=0.8, print_train_test_set_stat=True, \
+#   test_thresholds=False, random_seed=random_seed);
+# names = d_ctx_word._id2w
+# l = zip(names, model.coef_[0])
+# ls = sorted(l, reverse=True, key= lambda x: x[1]);
 
+# embed()
+
+interesting_id = 10
+names = d_ctx_word._id2w
+x = zip( names, np.squeeze( np.array( mat[interesting_id,:].todense() )))
+x = sorted([ (x,i) for (i, x) in enumerate(x) if x[1] > 0 ], key= lambda x: x[0][1], reverse=True )
