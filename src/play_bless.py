@@ -18,10 +18,9 @@ import text_entail.matrix as tm
 import text_entail.dictionary as td
 import text_entail.classify as tc
 
-from IPython import embed
+# from IPython import embed
 
-#BASE_DIR   = '/Users/stevo/Workspaces/rumblejungle/n2n/data/bless/';
-BASE_DIR    = '/Users/pi/data/tehsis/simsets/'
+BASE_DIR    = '../data'
 
 fn_labels   = os.path.join( BASE_DIR, 'bless/bless_nouns_hyper_vs_rest.tsv' )
 fn_ctx_word = os.path.join( BASE_DIR, 'ctx/svo_lmi_pruned' )
