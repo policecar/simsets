@@ -34,7 +34,12 @@ fn_sim_pair = os.path.join( BASE_DIR, 'sim/svo_flipped' )
 fn_lda_word = os.path.join( BASE_DIR, 'lda/model_final_doc2topic_5_5' )
 fn_lda_pair = os.path.join( BASE_DIR, 'lda/model_final_doc2topic_5_5_flipped' )
 
-refresh = False
+refresh = True
+if refresh:
+	fn_ctx_word += '.gz'
+	fn_ctx_pair += '.gz'
+	fn_sim_word += '.gz'
+	fn_sim_pair += '.gz'
 
 # instantiate logger
 reload( logging )

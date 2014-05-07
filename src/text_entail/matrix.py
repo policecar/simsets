@@ -21,7 +21,7 @@ def binarize_sparse_matrix(mat):
 	return mat;
 	
 def pred_vectors_with_context(preds_file, has_header=True):
-#   antibiotic	disease	X abolish Y	X administer in Y	TRUE
+	#   antibiotic	disease	X abolish Y	X administer in Y	TRUE
 	logging.info('creating predicate pairs class vector \'{}\''.format(preds_file));
 	temp = []
 	
@@ -48,6 +48,8 @@ def pred_vectors_with_context(preds_file, has_header=True):
 	return vec, d_triples;
 
 def arg_l_arg_r_pairs_vector(args_file, file_contains_context = False, has_header = True):
+	"""
+	"""
 	logging.info('creating arg pairs class vector \'{}\''.format(args_file));
 	temp = []
 	if file_contains_context:
@@ -79,16 +81,12 @@ def arg_l_arg_r_pairs_vector(args_file, file_contains_context = False, has_heade
 	return vec, d_triples;
 		
 
-def arg_l_arg_r_asjo_matrix(row_indices, \
-	jb_file, \
-	num_rows, \
-	col_indices, \
-	transform_w1 = lambda w1 : (w1[:w1.find('::@')], w1[w1.find('@::')+3:]), \
-	transform_w2sig = lambda w2sig : w2sig, \
-	mmfile_presuffix = '', \
-	reload=False):
+def arg_l_arg_r_asjo_matrix( row_indices, jb_file, num_rows, col_indices, 
+	transform_w1 = lambda w1 : (w1[:w1.find('::@')], w1[w1.find('@::')+3:]), 
+	transform_w2sig = lambda w2sig : w2sig, mmfile_presuffix = '', reload=False ):
 	
-	mm_file = jb_file + mmfile_presuffix + '.mm';
+	# strip file extension before adding suffix to filename
+	mm_file = os.path.splitext( jb_file )[0] + mmfile_presuffix + '.mm';
 	if os.path.exists(mm_file) and os.path.isfile(mm_file) and not reload:            
 		logging.info('corresponding matrix file already exists for \'{}\'.'.format(jb_file));
 		logging.info('loading \'{}\'.'.format(mm_file));
@@ -121,16 +119,11 @@ def arg_l_arg_r_asjo_matrix(row_indices, \
 	logging.info('finshed saving matrix');
 	return mat;
 
-def arg_asjo_matrix(row_indices, \
-	col_indices, \
-	jb_file, \
-	num_rows, \
-	transform_w1 = lambda w1 : w1, \
-	transform_w2sig = lambda w2sig : w2sig, \
-	mmfile_presuffix = '', \
-	reload=False):
+def arg_asjo_matrix( row_indices, col_indices, jb_file, num_rows, 
+	transform_w1 = lambda w1 : w1, transform_w2sig = lambda w2sig : w2sig,
+	mmfile_presuffix = '', reload=False ):
 	
-	mm_file = jb_file + mmfile_presuffix + '.mm';
+	mm_file = os.path.splitext( jb_file )[0] + mmfile_presuffix + '.mm';
 	if os.path.exists(mm_file) and os.path.isfile(mm_file) and not reload:            
 		logging.info('corresponding matrix file already exists for \'{}\'.'.format(jb_file));
 		logging.info('loading \'{}\'.'.format(mm_file));
@@ -171,7 +164,7 @@ def arg_to_topic_matrix(\
 	mmfile_presuffix = '',\
 	reload=False):
 	
-	mm_file = word2topic_file + mmfile_presuffix + '.mm';    
+	mm_file = os.path.splitext( word2topic_file )[0] + mmfile_presuffix + '.mm';    
 	if os.path.exists(mm_file) and os.path.isfile(mm_file) and not reload:            
 		logging.info('corresponding matrix file already exists for \'{}\'.'.format(word2topic_file));
 		logging.info('loading \'{}\'.'.format(mm_file));
@@ -207,7 +200,7 @@ def arg_l_arg_r_to_topic_matrix(\
 	mmfile_presuffix = '',\
 	reload=False):
 	
-	mm_file = pair2topic_file + mmfile_presuffix + '.mm';    
+	mm_file = os.path.splitext( pair2topic_file )[0] + mmfile_presuffix + '.mm';    
 	if os.path.exists(mm_file) and os.path.isfile(mm_file) and not reload:
 		logging.info('corresponding matrix file already exists for \'{}\'.'.format(pair2topic_file));
 		logging.info('loading \'{}\'.'.format(mm_file));
