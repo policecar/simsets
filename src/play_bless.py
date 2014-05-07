@@ -20,16 +20,21 @@ import text_entail.classify as tc
 
 # from IPython import embed
 
-BASE_DIR    = '../data'
+BASE_DIR    = '.../simsets_data'
 
 # filename specs for labels, contexts, similarities and topic modeling ( LDA )
-fn_labels   = os.path.join( BASE_DIR, 'bless/bless_nouns_hyper_vs_rest.tsv' )
+# fn_labels   = os.path.join( BASE_DIR, 'bless/bless_nouns_hyper_vs_rest.tsv' )
+# fn_labels   = os.path.join( BASE_DIR, 'bless/bless_nouns_coord_vs_rest.tsv' )
+fn_labels   = os.path.join( BASE_DIR, 'bless/bless_nouns_mero_vs_rest.tsv' )
+
 fn_ctx_word = os.path.join( BASE_DIR, 'ctx/svo_lmi_pruned' )
 fn_ctx_pair = os.path.join( BASE_DIR, 'ctx/svo_lmi_pruned_flipped' )
 fn_sim_word = os.path.join( BASE_DIR, 'sim/svo' )
 fn_sim_pair = os.path.join( BASE_DIR, 'sim/svo_flipped' )
-fn_lda_word = os.path.join( BASE_DIR, 'lda/model_final_doc2topic_5_5_' )
-fn_lda_pair = os.path.join( BASE_DIR, 'lda/model_final_doc2topic_5_5_flipped_' )
+fn_lda_word = os.path.join( BASE_DIR, 'lda/model_final_doc2topic_5_5' )
+fn_lda_pair = os.path.join( BASE_DIR, 'lda/model_final_doc2topic_5_5_flipped' )
+
+refresh = False
 
 # instantiate logger
 reload( logging )
@@ -46,23 +51,23 @@ num_triples = len( d_triples )
 logging.info( 'loading context features for word pairs' );
 d_ctx_pair = td.Dict();
 m_ctx_pair = tm.arg_l_arg_r_asjo_matrix( d_triples._rtuple2ids, fn_ctx_pair, 
-	num_triples, col_indices=d_ctx_pair, mmfile_presuffix='_pairs', reload=False )
+	num_triples, col_indices=d_ctx_pair, mmfile_presuffix='_pairs', reload=refresh )
 
 logging.info( 'loading similarity features for word pairs' )
 d_sim_pair = td.Dict()
 m_sim_pair = tm.arg_l_arg_r_asjo_matrix( d_triples._rtuple2ids, fn_sim_pair, 
 	num_triples, col_indices = d_sim_pair, 
 	transform_w2sig=lambda w2sig: sorted( list(w2sig), key=lambda x: float( x[1] ), reverse=True )[:20],
-	mmfile_presuffix='_pairs', reload=False )
+	mmfile_presuffix='_pairs', reload=refresh )
 
 logging.info( 'loading context features for words' );
 d_ctx_word = td.Dict();
-m_ctx_w1 = tm.arg_asjo_matrix(d_triples._m2ids, d_ctx_word, fn_ctx_word, num_triples,
+m_ctx_w1 = tm.arg_asjo_matrix( d_triples._m2ids, d_ctx_word, fn_ctx_word, num_triples,
 	transform_w2sig=lambda w2sig: sorted( list( w2sig ), key = lambda x: float( x[1] ), reverse=True )[:20],
-	mmfile_presuffix='_w1', reload=False )
-m_ctx_w2 = tm.arg_asjo_matrix(d_triples._r2ids, d_ctx_word, fn_ctx_word, num_triples, 
+	mmfile_presuffix='_w1', reload=refresh )
+m_ctx_w2 = tm.arg_asjo_matrix( d_triples._r2ids, d_ctx_word, fn_ctx_word, num_triples, 
 	transform_w2sig = lambda w2sig: sorted( list( w2sig ), key = lambda x: float( x[1] ), reverse=True )[:20], 
-	mmfile_presuffix='_w2', reload=False )
+	mmfile_presuffix='_w2', reload=refresh )
 
 # adjust ( context ) matrix dimensions, if they vary
 if m_ctx_w1.shape[1] < m_ctx_w2.shape[1]:
@@ -91,20 +96,20 @@ mb_ctx_minus_w2_w1		= mb_ctx_union_w1_w2 - mb_ctx_w1
 
 logging.info( 'loading topic features ( LDA ) for words and word pairs' )
 m_topic_pair = tm.arg_l_arg_r_to_topic_matrix( d_triples._rtuple2ids, fn_lda_pair, 
-	num_triples, mmfile_presuffix='_pairs', reload=False )
+	num_triples, mmfile_presuffix='_pairs', reload=refresh )
 m_topic_w1 = tm.arg_to_topic_matrix( d_triples._m2ids, fn_lda_word, 
-	num_triples, mmfile_presuffix='_w1', reload=False )
+	num_triples, mmfile_presuffix='_w1', reload=refresh )
 m_topic_w2 = tm.arg_to_topic_matrix( d_triples._r2ids, fn_lda_word, 
-	num_triples, mmfile_presuffix='_w2', reload=False )
+	num_triples, mmfile_presuffix='_w2', reload=refresh )
 
 logging.info( 'loading similarity features for words' )
 d_sim_word = td.Dict();
 m_sim_w1 = tm.arg_asjo_matrix(d_triples._m2ids, d_sim_word, fn_sim_word, num_triples,
 	transform_w2sig = lambda w2sig: sorted(list(w2sig), key=lambda x: float(x[1]), reverse=True)[:20], 
-	mmfile_presuffix='_w1', reload=False )
+	mmfile_presuffix='_w1', reload=refresh )
 m_sim_w2 = tm.arg_asjo_matrix(d_triples._r2ids, d_sim_word, fn_sim_word, num_triples, 
 	transform_w2sig = lambda w2sig: sorted(list(w2sig), key=lambda x: float(x[1]), reverse=True)[:20],
-	mmfile_presuffix='_w2', reload=False )
+	mmfile_presuffix='_w2', reload=refresh )
 
 # adjust ( similarity ) matrix dimensions, if they vary
 if m_sim_w1.shape[1] < m_sim_w2.shape[1]:
@@ -180,9 +185,9 @@ model = tc.run_classification_test( mat, y_true, binarize=True,
 # l = zip(names, model.coef_[0])
 # ls = sorted(l, reverse=True, key= lambda x: x[1]);
 
-# embed()
-
 # interesting_id = 10
 # names = d_ctx_word._id2w
 # x = zip( names, np.squeeze( np.array( mat[interesting_id,:].todense() )))
 # x = sorted([ (x,i) for (i, x) in enumerate(x) if x[1] > 0 ], key= lambda x: x[0][1], reverse=True )
+
+# embed()
