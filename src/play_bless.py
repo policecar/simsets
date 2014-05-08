@@ -29,8 +29,8 @@ except ImportError:
 
 # filename specs for labels, contexts, similarities and topic modeling ( LDA )
 # fn_labels   = os.path.join( BASE_DIR, 'bless/bless_nouns_hyper_vs_rest.tsv' )
-# fn_labels   = os.path.join( BASE_DIR, 'bless/bless_nouns_coord_vs_rest.tsv' )
-fn_labels   = os.path.join( BASE_DIR, 'bless/bless_nouns_mero_vs_rest.tsv' )
+fn_labels   = os.path.join( BASE_DIR, 'bless/bless_nouns_coord_vs_rest.tsv' )
+# fn_labels   = os.path.join( BASE_DIR, 'bless/bless_nouns_mero_vs_rest.tsv' )
 
 fn_ctx_word = os.path.join( BASE_DIR, 'ctx/svo_lmi_pruned.gz' )
 fn_ctx_pair = os.path.join( BASE_DIR, 'ctx/svo_lmi_pruned_flipped.gz' )
@@ -39,12 +39,7 @@ fn_sim_pair = os.path.join( BASE_DIR, 'sim/svo_flipped.gz' )
 fn_lda_word = os.path.join( BASE_DIR, 'lda/model_final_doc2topic_5_5' )
 fn_lda_pair = os.path.join( BASE_DIR, 'lda/model_final_doc2topic_5_5_flipped' )
 
-refresh = False
-# if refresh:
-# 	fn_ctx_word += '.gz'
-# 	fn_ctx_pair += '.gz'
-# 	fn_sim_word += '.gz'
-# 	fn_sim_pair += '.gz'
+refresh = True
 
 # instantiate logger
 reload( logging )
