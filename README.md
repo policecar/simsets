@@ -2,9 +2,8 @@
 
 Predicting semantic relations with set algebra.
 
-### Setting
-
-Subject-Verb-Object (SVO) snippets from [Google's syntactic n-grams](https://commondatastorage.googleapis.com/books/syntactic-ngrams/index.html) as well as their flipped version Object-Verb-Subject were used to compute context and similarity features for the [BLESS noun pairs](https://sites.google.com/site/geometricalmodels/shared-evaluation) using the [JoBim framework](http://sourceforge.net/projects/jobimtext/).  
+--
+Subject-Verb-Object (SVO) constructs extracted from [Google's syntactic n-grams](https://commondatastorage.googleapis.com/books/syntactic-ngrams/index.html) as well as their flipped version Object-Verb-Subject were used to compute context and similarity features for the [BLESS noun pairs](https://sites.google.com/site/geometricalmodels/shared-evaluation) using the [JoBim framework](http://sourceforge.net/projects/jobimtext/). The resulting feature matrices were combined to predict the semantic relation between pairs of words; e.g. hyper(alligator,chordate), mero(alligator,jaw), coord(alligator,crocodile), random(alligator,addition). 
 
 ( s. e.g. [statistical semantics](http://aclweb.org/aclwiki/index.php?title=Statistical_Semantics) for some background on the underlying linguistic hypothesis )  
 
