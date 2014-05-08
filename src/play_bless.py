@@ -10,6 +10,8 @@ Created on Wed Apr  9 13:44:30 2014
 from __future__ import print_function
 from __future__ import division
 
+from pprint import pprint
+
 import logging, os
 import scipy.sparse as sparse
 import numpy as np
@@ -18,28 +20,30 @@ import text_entail.matrix as tm
 import text_entail.dictionary as td
 import text_entail.classify as tc
 
-# from IPython import embed
-
-BASE_DIR    = '.../simsets_data'
+try:
+	import IPython
+	from IPython import embed
+except ImportError:
+	pass
 
 # filename specs for labels, contexts, similarities and topic modeling ( LDA )
 # fn_labels   = os.path.join( BASE_DIR, 'bless/bless_nouns_hyper_vs_rest.tsv' )
 # fn_labels   = os.path.join( BASE_DIR, 'bless/bless_nouns_coord_vs_rest.tsv' )
 fn_labels   = os.path.join( BASE_DIR, 'bless/bless_nouns_mero_vs_rest.tsv' )
 
-fn_ctx_word = os.path.join( BASE_DIR, 'ctx/svo_lmi_pruned' )
-fn_ctx_pair = os.path.join( BASE_DIR, 'ctx/svo_lmi_pruned_flipped' )
-fn_sim_word = os.path.join( BASE_DIR, 'sim/svo' )
-fn_sim_pair = os.path.join( BASE_DIR, 'sim/svo_flipped' )
+fn_ctx_word = os.path.join( BASE_DIR, 'ctx/svo_lmi_pruned.gz' )
+fn_ctx_pair = os.path.join( BASE_DIR, 'ctx/svo_lmi_pruned_flipped.gz' )
+fn_sim_word = os.path.join( BASE_DIR, 'sim/svo.gz' )
+fn_sim_pair = os.path.join( BASE_DIR, 'sim/svo_flipped.gz' )
 fn_lda_word = os.path.join( BASE_DIR, 'lda/model_final_doc2topic_5_5' )
 fn_lda_pair = os.path.join( BASE_DIR, 'lda/model_final_doc2topic_5_5_flipped' )
 
-refresh = True
-if refresh:
-	fn_ctx_word += '.gz'
-	fn_ctx_pair += '.gz'
-	fn_sim_word += '.gz'
-	fn_sim_pair += '.gz'
+refresh = False
+# if refresh:
+# 	fn_ctx_word += '.gz'
+# 	fn_ctx_pair += '.gz'
+# 	fn_sim_word += '.gz'
+# 	fn_sim_pair += '.gz'
 
 # instantiate logger
 reload( logging )
@@ -143,9 +147,10 @@ mb_sim_minus_w2_w1 		= mb_sim_union_w1_w2 - mb_sim_w1
 logging.info( 'stacking matrices' )
 # stack only two matrices at a time because of memory issues, 
 # initialize with ( num_rows x 1 ) matrix which must be removed later again
+#TEUXDEUX: where is this removed again ?
 mat = sparse.csr_matrix(( num_triples, 1 ), dtype=np.float64 )
 
-# does it make sense to stack boolean and non-boolean matrices !?
+#TEUXDEUX: does it make sense to stack boolean and non-boolean matrices !?
 # context and similarity features for word pairs
 # mat = sparse.hstack(( mat, m_ctx_pair ));
 # mat = sparse.hstack(( mat, m_sim_pair ));
@@ -194,5 +199,16 @@ model = tc.run_classification_test( mat, y_true, binarize=True,
 # names = d_ctx_word._id2w
 # x = zip( names, np.squeeze( np.array( mat[interesting_id,:].todense() )))
 # x = sorted([ (x,i) for (i, x) in enumerate(x) if x[1] > 0 ], key= lambda x: x[0][1], reverse=True )
+
+logging.info( "inspect some of the features" )
+# replicate hstacking here to attain names
+names = d_ctx_word._id2w
+# names = d_ctx_pair._id2w + d_ctx_word._id2w #TEUXDEUX: was machst du da ?
+# combine feature names with their coefficients /weights
+features = zip( names, model.coef_[0] )
+# sort descending
+sorted_features = sorted( features, reverse=True, key=lambda x: x[1] )
+# print top ten features
+pprint(sorted_features[:10])
 
 # embed()
