@@ -10,6 +10,7 @@ Created on Wed Apr  9 13:44:30 2014
 from __future__ import print_function
 from __future__ import division
 
+from config import *
 from pprint import pprint
 
 import logging, os
