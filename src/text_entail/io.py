@@ -11,16 +11,22 @@ import logging;
 import gzip;
 
 def read_args_wo_ctx(argfile, has_header=True):
+	"""
+	"""
 	logging.info('reading file \'{}\''.format(argfile));
+	
 	with gzip.open(argfile) if argfile.endswith('.gz') else open(argfile) as f:
 		if has_header:
 			f.readline(); # skip header line
 		for line in f:
 			arg_l, arg_r, entail = line.rstrip().split('\t',2);
 			yield arg_l, arg_r, entail;
+	
 	logging.info('finished reading file \'{}\''.format(argfile));
 
 def read_args_w_ctx(argfile, has_header=True):
+	"""
+	"""
 	logging.info('reading file \'{}\''.format(argfile));
 	with gzip.open(argfile) if argfile.endswith('.gz') else open(argfile) as f:
 		if has_header:
@@ -31,7 +37,9 @@ def read_args_w_ctx(argfile, has_header=True):
 	logging.info('finished reading file \'{}\''.format(argfile));
 	
 def read_preds_w_ctx(predfile, has_header=True):
-# X	Y	PRED_L	   PRED_R	ENTAILING
+	"""
+	"""
+	# X	Y	PRED_L	   PRED_R	ENTAILING
 	logging.info('reading file \'{}\''.format(predfile));
 	with gzip.open(predfile) if predfile.endswith('.gz') else open(predfile) as f:
 		if has_header:
@@ -42,6 +50,8 @@ def read_preds_w_ctx(predfile, has_header=True):
 	logging.info('finished reading file \'{}\''.format(predfile));
 
 def read_jb_file(fn):
+	"""
+	"""
 	logging.info('reading file \'{}\''.format(fn));
 	with gzip.open(fn) if fn.endswith('.gz') else open(fn) as f:
 		w_ = None;
@@ -80,6 +90,8 @@ def read_jb_file(fn):
 #            yield w_, tuple(similar_w_);
 			
 def read_jb_file_filter_by_jo(fn, filter_by_jo_fun = lambda jo : False):
+	"""
+	"""
 	logging.info('reading jb file \'{}\''.format(fn));
 	with gzip.open(fn) if fn.endswith('.gz') else open(fn) as f:
 		w_ = None;
@@ -113,9 +125,12 @@ def read_jb_file_filter_by_jo(fn, filter_by_jo_fun = lambda jo : False):
 #    return d;
 	
 def binarize_mmfile(mm_file):
+	"""
+	"""
 	logging.info('reading file \'{}\''.format(mm_file));
 	new_mm_file = mm_file[:mm_file.rfind('.')] + '.bin' + mm_file[mm_file.rfind('.'):];
 	logging.info('writing to file \'{}\''.format(new_mm_file));
+	
 	with open(mm_file) as f:
 		with open(new_mm_file,'w') as fo:
 			first_line_skipped = False;
@@ -135,6 +150,8 @@ def binarize_mmfile(mm_file):
 		os.popen('cp {} {}'.format(mm_file+'i', new_mm_file+'i'));
 
 def read_word2topicfile(word2topic_file):
+	"""
+	"""
 	logging.info('reading file \'{}\''.format(word2topic_file));
 	with gzip.open(word2topic_file) if word2topic_file.endswith('.gz') else open(word2topic_file) as f:
 		for line in f:
