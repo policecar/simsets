@@ -7,6 +7,7 @@ Subject-Verb-Object (SVO) constructs extracted from [Google's syntactic n-grams]
 
 ( For some background on the underlying (computer-)linguistic hypothesis s. e.g. [statistical semantics](http://aclweb.org/aclwiki/index.php?title=Statistical_Semantics) )  
 
+
 ### The data/ directory
 
 Dir | Content
@@ -17,14 +18,14 @@ lda | a topic model of the data
 bless | labeled word pairs
 
 
-### References
-
-[Turney 2013](arxiv.org/pdf/1401.8269v1.pdf) – similarity differences for textual entailment ( set minus )  
-[Mikolov 2013](http://papers.nips.cc/paper/5021-distributed-representations-of-words-and-phrases-and-their-compositionality) – vector arithmetics with word representations ( element-wise addition )  
-
 ### Usage
 
 ```python
 python2.7 play_bless.py
 ```
 
+
+### References
+
+[Turney 2013](arxiv.org/pdf/1401.8269v1.pdf) – similarity differences for textual entailment ( set minus )  
+[Mikolov 2013](http://papers.nips.cc/paper/5021-distributed-representations-of-words-and-phrases-and-their-compositionality) – vector arithmetics with word representations ( element-wise addition )  
