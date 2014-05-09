@@ -29,8 +29,8 @@ except ImportError:
 
 # filename specs for labels, contexts, similarities and topic modeling ( LDA )
 # fn_labels   = os.path.join( BASE_DIR, 'bless/bless_nouns_hyper_vs_rest.tsv' )
-fn_labels   = os.path.join( BASE_DIR, 'bless/bless_nouns_coord_vs_rest.tsv' )
-# fn_labels   = os.path.join( BASE_DIR, 'bless/bless_nouns_mero_vs_rest.tsv' )
+# fn_labels   = os.path.join( BASE_DIR, 'bless/bless_nouns_coord_vs_rest.tsv' )
+fn_labels   = os.path.join( BASE_DIR, 'bless/bless_nouns_mero_vs_rest.tsv' )
 
 fn_ctx_word = os.path.join( BASE_DIR, 'ctx/svo_lmi_pruned.gz' )
 fn_ctx_pair = os.path.join( BASE_DIR, 'ctx/svo_lmi_pruned_flipped.gz' )
@@ -39,7 +39,7 @@ fn_sim_pair = os.path.join( BASE_DIR, 'sim/svo_flipped.gz' )
 fn_lda_word = os.path.join( BASE_DIR, 'lda/model_final_doc2topic_5_5' )
 fn_lda_pair = os.path.join( BASE_DIR, 'lda/model_final_doc2topic_5_5_flipped' )
 
-refresh = True
+refresh = False
 
 # instantiate logger
 reload( logging )
@@ -53,8 +53,8 @@ num_triples = len( d_triples )
 
 # Note: the prefix d_ indicates a dictionary, m_ a matrix, mb_ a boolean matrix
 
-logging.info( 'loading context features for word pairs' );
-d_ctx_pair = td.Dict();
+logging.info( 'loading context features for word pairs' )
+d_ctx_pair = td.Dict()
 m_ctx_pair = tm.arg_l_arg_r_asjo_matrix( d_triples._rtuple2ids, fn_ctx_pair, 
 	num_triples, col_indices=d_ctx_pair, mmfile_presuffix='_pairs', reload=refresh )
 
@@ -65,8 +65,8 @@ m_sim_pair = tm.arg_l_arg_r_asjo_matrix( d_triples._rtuple2ids, fn_sim_pair,
 	transform_w2sig=lambda w2sig: sorted( list(w2sig), key=lambda x: float( x[1] ), reverse=True )[:20],
 	mmfile_presuffix='_pairs', reload=refresh )
 
-logging.info( 'loading context features for words' );
-d_ctx_word = td.Dict();
+logging.info( 'loading context features for words' )
+d_ctx_word = td.Dict()
 m_ctx_w1 = tm.arg_asjo_matrix( d_triples._m2ids, d_ctx_word, fn_ctx_word, num_triples,
 	transform_w2sig=lambda w2sig: sorted( list( w2sig ), key = lambda x: float( x[1] ), reverse=True )[:20],
 	mmfile_presuffix='_w1', reload=refresh )
@@ -108,7 +108,7 @@ m_topic_w2 = tm.arg_to_topic_matrix( d_triples._r2ids, fn_lda_word,
 	num_triples, mmfile_presuffix='_w2', reload=refresh )
 
 logging.info( 'loading similarity features for words' )
-d_sim_word = td.Dict();
+d_sim_word = td.Dict()
 m_sim_w1 = tm.arg_asjo_matrix(d_triples._m2ids, d_sim_word, fn_sim_word, num_triples,
 	transform_w2sig = lambda w2sig: sorted(list(w2sig), key=lambda x: float(x[1]), reverse=True)[:20], 
 	mmfile_presuffix='_w1', reload=refresh )
@@ -119,17 +119,17 @@ m_sim_w2 = tm.arg_asjo_matrix(d_triples._r2ids, d_sim_word, fn_sim_word, num_tri
 # adjust ( similarity ) matrix dimensions, if they vary
 if m_sim_w1.shape[1] < m_sim_w2.shape[1]:
 	if sparse.isspmatrix_coo(m_sim_w1):
-		m_sim_w1 = m_sim_w1.todok();
-	m_sim_w1.resize(m_sim_w2.shape);
+		m_sim_w1 = m_sim_w1.todok()
+	m_sim_w1.resize(m_sim_w2.shape)
 if m_sim_w2.shape[1] < m_sim_w1.shape[1]:
 	if sparse.isspmatrix_coo(m_sim_w2):
-		m_sim_w2 = m_sim_w2.todok();
-	m_sim_w2.resize(m_sim_w1.shape);    
+		m_sim_w2 = m_sim_w2.todok()
+	m_sim_w2.resize(m_sim_w1.shape)    
 
 if not sparse.isspmatrix_coo(m_sim_w1):
-	m_sim_w1 = m_sim_w1.tocoo();
+	m_sim_w1 = m_sim_w1.tocoo()
 if not sparse.isspmatrix_coo(m_sim_w2):
-	m_sim_w2 = m_sim_w2.tocoo();
+	m_sim_w2 = m_sim_w2.tocoo()
 	
 logging.info( "computing set operations on similarity matrices" )
 mb_sim_w1 				= m_sim_w1.astype( bool )
@@ -148,17 +148,17 @@ mat = sparse.csr_matrix(( num_triples, 1 ), dtype=np.float64 )
 
 #TEUXDEUX: does it make sense to stack boolean and non-boolean matrices !?
 # context and similarity features for word pairs
-# mat = sparse.hstack(( mat, m_ctx_pair ));
-# mat = sparse.hstack(( mat, m_sim_pair ));
+# mat = sparse.hstack(( mat, m_ctx_pair ))
+# mat = sparse.hstack(( mat, m_sim_pair ))
 
 # context features of words
-# mat = sparse.hstack(( mat, mb_ctx_w1.astype( np.float64 )));
-mat = sparse.hstack(( mat, mb_ctx_w2.astype( np.float64 )));
-# mat = sparse.hstack(( mat, mb_ctx_union_w1_w2.astype( np.float64 )));
-# mat = sparse.hstack(( mat, mb_ctx_diff_w1_w2.astype( np.float64 )));
-# mat = sparse.hstack(( mat, mb_ctx_intersect_w1_w2.astype( np.float64 )));
-# mat = sparse.hstack(( mat, mb_ctx_minus_w1_w2.astype( np.float64 )));
-# mat = sparse.hstack(( mat, mb_ctx_minus_w2_w1.astype( np.float64 )));
+# mat = sparse.hstack(( mat, mb_ctx_w1.astype( np.float64 )))
+mat = sparse.hstack(( mat, mb_ctx_w2.astype( np.float64 )))
+# mat = sparse.hstack(( mat, mb_ctx_union_w1_w2.astype( np.float64 )))
+# mat = sparse.hstack(( mat, mb_ctx_diff_w1_w2.astype( np.float64 )))
+# mat = sparse.hstack(( mat, mb_ctx_intersect_w1_w2.astype( np.float64 )))
+# mat = sparse.hstack(( mat, mb_ctx_minus_w1_w2.astype( np.float64 )))
+# mat = sparse.hstack(( mat, mb_ctx_minus_w2_w1.astype( np.float64 )))
 
 # topic features for words and for word pairs
 # mat = sparse.hstack(( mat, m_topic_pair ))
@@ -166,18 +166,18 @@ mat = sparse.hstack(( mat, mb_ctx_w2.astype( np.float64 )));
 # mat = sparse.hstack(( mat, m_topic_w2 )).tocsr() # why here tocsr() !?
 
 # similarity features for words
-# mat = sparse.hstack(( mat, mb_sim_w1.astype( np.float64 )));
-# mat = sparse.hstack(( mat, mb_sim_w2.astype( np.float64 )));
-# mat = sparse.hstack(( mat, mb_sim_union_w1_w2.astype( np.float64 )));
-# mat = sparse.hstack(( mat, mb_sim_diff_w1_w2.astype( np.float64 )));
-# mat = sparse.hstack(( mat, mb_sim_intersect_w1_w2.astype( np.float64 )));
-# mat = sparse.hstack(( mat, mb_sim_minus_w1_w2.astype( np.float64 )));
-# mat = sparse.hstack(( mat, mb_sim_minus_w2_w1.astype( np.float64 )));
+# mat = sparse.hstack(( mat, mb_sim_w1.astype( np.float64 )))
+# mat = sparse.hstack(( mat, mb_sim_w2.astype( np.float64 )))
+# mat = sparse.hstack(( mat, mb_sim_union_w1_w2.astype( np.float64 )))
+# mat = sparse.hstack(( mat, mb_sim_diff_w1_w2.astype( np.float64 )))
+# mat = sparse.hstack(( mat, mb_sim_intersect_w1_w2.astype( np.float64 )))
+# mat = sparse.hstack(( mat, mb_sim_minus_w1_w2.astype( np.float64 )))
+# mat = sparse.hstack(( mat, mb_sim_minus_w2_w1.astype( np.float64 )))
 
 # pairs <set operation> single noun
 
-rand_seed = 623519;
-# rand_seed = 234123;
+rand_seed = 623519
+# rand_seed = 234123
 
 logging.info( "training classifier and predicting labels" )
 mat = mat.tocsr()[:,1:]
@@ -186,10 +186,10 @@ model = tc.run_classification_test( mat, y_true, binarize=True,
 	test_thresholds=False, random_seed=rand_seed )
 # model = tc.run_classification_test(mat.tocsr()[:,1:], y_true, \
 #   binarize=True, percentage_train=0.8, print_train_test_set_stat=True, \
-#   test_thresholds=False, random_seed=random_seed);
+#   test_thresholds=False, random_seed=random_seed)
 # names = d_ctx_word._id2w
 # l = zip(names, model.coef_[0])
-# ls = sorted(l, reverse=True, key= lambda x: x[1]);
+# ls = sorted(l, reverse=True, key= lambda x: x[1])
 
 # interesting_id = 10
 # names = d_ctx_word._id2w
@@ -199,12 +199,14 @@ model = tc.run_classification_test( mat, y_true, binarize=True,
 logging.info( "inspect some of the features" )
 # replicate hstacking here to attain names
 names = d_ctx_word._id2w
-# names = d_ctx_pair._id2w + d_ctx_word._id2w #TEUXDEUX: was machst du da ?
+# names = d_ctx_pair._id2w + d_sim_pair._id2w
+# names = d_topic_pair._id2w
+# names = d_ctx_pair._id2w + d_ctx_word._id2w
 # combine feature names with their coefficients /weights
 features = zip( names, model.coef_[0] )
 # sort descending
 sorted_features = sorted( features, reverse=True, key=lambda x: x[1] )
 # print top ten features
-pprint(sorted_features[:10])
+pprint(sorted_features[:35])
 
 # embed()
