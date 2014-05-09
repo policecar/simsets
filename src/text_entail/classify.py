@@ -18,7 +18,11 @@ from sklearn import metrics
 import text_entail.matrix as tm
 import text_entail.io as tio
 
-from IPython import embed
+try:
+	import IPython
+	from IPython import embed
+except ImportError:
+	pass
 
 def run_baseline_classification_test( y_true ):
 	"""
@@ -33,9 +37,9 @@ def run_baseline_classification_test( y_true ):
 	y_true_ = np.ones( len( y_true )) - y_true
 	calculate_statistics( y_true_, y_pred )
 
-def run_classification_test( mat, y_true, binarize=True, 
-	percentage_train=0.8, print_train_test_set_stat=True, 
-	test_thresholds=False, random_seed=None, d_args=None ):
+def run_classification_test( mat, y_true, binarize=True, percentage_train=0.8, 
+	print_train_test_set_stat=True, test_thresholds=False, random_seed=None, 
+	d_args=None ):
 	"""
 	"""
 	# binarize full matrix if desired
@@ -56,8 +60,7 @@ def run_classification_test( mat, y_true, binarize=True,
 	model = classify( mat_train, mat_test, y_true_train, y_true_test, test_thresholds )
 	return model
 
-def get_stratified_train_test_indices( y_true, percentage_train=0.8, 
-	random_seed=None ):
+def get_stratified_train_test_indices( y_true, percentage_train=0.8, random_seed=None ):
 	"""
 	"""
 	r = rand.Random( x=random_seed )
@@ -82,7 +85,8 @@ def get_stratified_train_test_indices( y_true, percentage_train=0.8,
 	return idx_train, idx_test
 
 def get_train_test_indices_presplit(d_args):
-
+	"""
+	"""
 	t1 = tio.read_args_w_ctx('../data/updates/4/args_v2_am.tsv', has_header=False);
 	train_ids = [];
 	for ctx, arg_l, arg_r, __ in t1:
@@ -192,9 +196,8 @@ def classify( m_train, m_test, y_true_train, y_true_test, test_thresholds=False 
 	return model
 	
 def calculate_statistics( y_true, y_pred ):
-	
-	# embed()
-
+	"""
+	"""
 	# calculate and print results
 	y_true = y_true.astype( bool )
 	y_pred = y_pred.astype( bool )
