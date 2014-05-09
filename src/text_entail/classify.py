@@ -203,7 +203,7 @@ def calculate_statistics( y_true, y_pred ):
 	y_pred = y_pred.astype( bool )
 
 	# compute true positives, false positives, true negatives, false negatives
-	# why would you apply bitwise operators on boolean values !?
+	#TEUXDEUX: do bitwise operators work on boolean values ?
 	tp = y_true & y_pred
 	fp = tp ^ y_pred
 	fn = tp ^ y_true
