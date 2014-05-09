@@ -52,7 +52,7 @@ def run_classification_test( mat, y_true, binarize=True, percentage_train=0.8,
 	logging.info( "splitting data into train and test set" )
 	idx_train, idx_test = get_stratified_train_test_indices( y_true, 
 		percentage_train, random_seed )
-	# idx_train, idx_test = get_train_test_indices_presplit( d_args );
+	# idx_train, idx_test = get_train_test_indices_presplit( d_args )
 	mat_train, mat_test, y_true_train, y_true_test = \
 		split_matrix_to_train_and_test( mat, y_true, idx_train, idx_test, 
 			print_stat=print_train_test_set_stat )
@@ -88,29 +88,29 @@ def get_train_test_indices_presplit(d_args):
 	"""
 	"""
 	t1 = tio.read_args_w_ctx('../data/updates/4/args_v2_am.tsv', has_header=False);
-	train_ids = [];
+	train_ids = []
 	for ctx, arg_l, arg_r, __ in t1:
-		id_ = d_args.get_triple_id((ctx, arg_l, arg_r));
-		train_ids.append(id_);
+		id_ = d_args.get_triple_id((ctx, arg_l, arg_r))
+		train_ids.append(id_)
 	
 	t2 = tio.read_args_w_ctx('../data/updates/4/args_v2_nz.tsv', has_header=False);
-	test_ids = [];
+	test_ids = []
 	for ctx, arg_l, arg_r, __ in t2:
-		id_ = d_args.get_triple_id((ctx, arg_l, arg_r));
-		test_ids.append(id_);
+		id_ = d_args.get_triple_id((ctx, arg_l, arg_r))
+		test_ids.append(id_)
 	
-	return train_ids, test_ids;
+	return train_ids, test_ids
 	
 def split_matrix_to_train_and_test( mat, y_true, idx_train, idx_test, print_stat=False ):
 	"""
 	"""
-	mat_train = mat[idx_train,:];
-	labels_train = y_true[idx_train];
-	mat_test = mat[idx_test,:];
-	labels_test = y_true[idx_test];
+	mat_train = mat[idx_train,:]
+	labels_train = y_true[idx_train]
+	mat_test = mat[idx_test,:]
+	labels_test = y_true[idx_test]
 
 	if print_stat:
-		print('======');
+		print('======')
 		print('  percentage of training examples: {}\n  num training examples: {} ({}/{})\n  num testing examples:  {} ({}/{})'.format(
 			len( idx_train ) / len( y_true ),
 			len( idx_train ),
@@ -208,36 +208,35 @@ def calculate_statistics( y_true, y_pred ):
 	fp = tp ^ y_pred
 	fn = tp ^ y_true
 	
-	sum_tp = tp.sum();
-	sum_fp = fp.sum();
-	sum_fn = fn.sum();
-	sum_tn = y_true.shape[0] - sum_tp - sum_fp - sum_fn;
+	sum_tp = tp.sum()
+	sum_fp = fp.sum()
+	sum_fn = fn.sum()
+	sum_tn = y_true.shape[0] - sum_tp - sum_fp - sum_fn
 	
-	prec_1 = sum_tp / (sum_tp + sum_fp);
-	rec_1  = sum_tp / (sum_tp + sum_fn);
-	acc  = (sum_tp + sum_tn) / y_true.shape[0];
-	f1_1   = 2 * (prec_1 * rec_1)/(prec_1 + rec_1);
+	prec_1 = sum_tp / (sum_tp + sum_fp)
+	rec_1  = sum_tp / (sum_tp + sum_fn)
+	acc  = (sum_tp + sum_tn) / y_true.shape[0]
+	f1_1   = 2 * (prec_1 * rec_1)/(prec_1 + rec_1)
 	
-	prec_0 = sum_tn / (sum_tn + sum_fn);
-	rec_0  = sum_tn / (sum_tn + sum_fp);
-	f1_0   = 2 * (prec_0 * rec_0)/(prec_0 + rec_0);
+	prec_0 = sum_tn / (sum_tn + sum_fn)
+	rec_0  = sum_tn / (sum_tn + sum_fp)
+	f1_0   = 2 * (prec_0 * rec_0)/(prec_0 + rec_0)
 	
-	prec = .5 * prec_1 + .5 * prec_0;
-	rec = .5 * rec_1 + .5 * rec_0;
-	f1   = 2 * (prec * rec)/(prec + rec);
+	prec = .5 * prec_1 + .5 * prec_0
+	rec = .5 * rec_1 + .5 * rec_0
+	f1   = 2 * (prec * rec)/(prec + rec)
 
-	w1 = y_true.sum() / len(y_true);
-	w2 = 1 - w1;
-	prec_w = w1 * prec_1 + w2 * prec_0;
-	rec_w = w1 * rec_1 + w2 * rec_0;
-	f1_w   = 2 * (prec_w * rec_w)/(prec_w + rec_w);
+	w1 = y_true.sum() / len(y_true)
+	w2 = 1 - w1
+	prec_w = w1 * prec_1 + w2 * prec_0
+	rec_w = w1 * rec_1 + w2 * rec_0
+	f1_w   = 2 * (prec_w * rec_w)/(prec_w + rec_w)
 	
-	print('======');
-	print('\n  TP: {}\n  FP: {}\n  FN: {}\n  TN: {}\n'.format(sum_tp, sum_fp, sum_fn, sum_tn));
-	# print('  Acc: {}\n'.format(acc));
-	# print('  Pr(1): {}\n  Re(1): {}\n  F1(1): {}\n'.format(prec_1, rec_1, f1_1));
-	# print('  Pr(0): {}\n  Re(0): {}\n  F1(0): {}\n'.format(prec_0, rec_0, f1_0));
-	# print('  Pr_w(0.5): {}\n  Re_w(0.5): {}\n  F1_w(0.5): {}\n'.format(prec, rec, f1));
-	# print('  Pr_w(c): {}\n  Re_w(c): {}\n  F1_w(c): {}'.format(prec_w, rec_w, f1_w));
-	print('======');
-
+	print('======')
+	print('\n  TP: {}\n  FP: {}\n  FN: {}\n  TN: {}\n'.format(sum_tp, sum_fp, sum_fn, sum_tn))
+	# print('  Acc: {}\n'.format(acc))
+	# print('  Pr(1): {}\n  Re(1): {}\n  F1(1): {}\n'.format(prec_1, rec_1, f1_1))
+	# print('  Pr(0): {}\n  Re(0): {}\n  F1(0): {}\n'.format(prec_0, rec_0, f1_0))
+	# print('  Pr_w(0.5): {}\n  Re_w(0.5): {}\n  F1_w(0.5): {}\n'.format(prec, rec, f1))
+	# print('  Pr_w(c): {}\n  Re_w(c): {}\n  F1_w(c): {}'.format(prec_w, rec_w, f1_w))
+	print('======')
