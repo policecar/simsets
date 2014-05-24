@@ -3,6 +3,7 @@
 Created on Thu Apr  3 09:43:23 2014
 
 @author: stevo
+@author: priska
 """
 
 from __future__ import print_function
@@ -39,7 +40,7 @@ def run_baseline_classification_test( y_true ):
 
 def run_classification_test( mat, y_true, binarize=True, percentage_train=0.8, 
 	print_train_test_set_stat=True, test_thresholds=False, random_seed=None, 
-	d_args=None ):
+	d_args=None, d_triples=None ):
 	"""
 	"""
 	# binarize full matrix if desired
@@ -50,9 +51,12 @@ def run_classification_test( mat, y_true, binarize=True, percentage_train=0.8,
 	
 	# create train and test split
 	logging.info( "splitting data into train and test set" )
-	idx_train, idx_test = get_stratified_train_test_indices( y_true, 
+	# idx_train, idx_test = get_stratified_train_test_indices( y_true, 
+	# 	percentage_train, random_seed )
+	# # idx_train, idx_test = get_train_test_indices_presplit( d_args )
+	idx_train, idx_test = get_train_test_indices_from_triples( d_triples, y_true,
 		percentage_train, random_seed )
-	# idx_train, idx_test = get_train_test_indices_presplit( d_args )
+	
 	mat_train, mat_test, y_true_train, y_true_test = \
 		split_matrix_to_train_and_test( mat, y_true, idx_train, idx_test, 
 			print_stat=print_train_test_set_stat )
@@ -81,10 +85,49 @@ def get_stratified_train_test_indices( y_true, percentage_train=0.8, random_seed
 	# # note: unnecessary
 	# r.shuffle( idx_train )
 	# r.shuffle( idx_test )
-	
+
 	return idx_train, idx_test
 
-def get_train_test_indices_presplit(d_args):
+def get_train_test_indices_from_triples( d_triples, y_true, percentage_train=0.8,
+	random_seed=None ):
+	"""
+	Splits train and test set such as to maximize non-overlap of vocabulary;
+	ie. allows a right word to only be either in the train or in the test set.
+	"""
+	# got thru triples and collect unique right words
+	w2 = set()
+	for i in range( len( d_triples )):
+		w2.add( d_triples.get_triple(i)[2] )
+	w2 = list( w2 )
+
+	# for every right word collect the ids of the triples it occurs in
+	w2idx = {}
+	for w in w2:
+		w2idx[w] = d_triples.get_right_element_ids(w)
+
+	# shuffle w2
+	r = rand.Random( x=random_seed )
+	r.shuffle( w2 )
+
+	#TEUXDEUX: the split into train and test data does not yet consider classes
+
+	# split right words into train and test set according to percentage_train
+	split_num = int( len( w2 ) * percentage_train )
+	w2_train = w2[:split_num]
+	w2_test  = w2[split_num:]
+
+	idx_train = []
+	for w in w2_train:
+		idx_train.extend( w2idx[w] )
+
+	idx_test  = []
+	for w in w2_test:
+		idx_test.extend( w2idx[w] )
+
+	# return respective ids as train and test indices
+	return np.asarray( idx_train ), np.asarray( idx_test )
+
+def get_train_test_indices_presplit( d_args ):
 	"""
 	"""
 	t1 = tio.read_args_w_ctx('../data/updates/4/args_v2_am.tsv', has_header=False);
@@ -144,6 +187,7 @@ def classify( m_train, m_test, y_true_train, y_true_test, test_thresholds=False 
 	# compute classification report ( incl. precision, recall, f_score etc. )
 	report = metrics.classification_report( y_true_test, y_pred )
 	print( report )
+	print( 'average precision: %f' % metrics.average_precision_score( y_true_test, y_pred ))
 
 	# 
 	if test_thresholds:
