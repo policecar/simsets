@@ -55,6 +55,29 @@ def run_classification_test(mat, true_labels, binarize=True,
     model = classify(train_mat, test_mat, true_train_labels, true_test_labels, test_thresholds)
     return model
 
+def get_stratified_train_test_indexes_notnull(mat, true_labels, percentage_train = 0.8, random_seed=None):
+    """
+    """
+    r = rand.Random(x=random_seed)
+
+    null_idxes = np.squeeze(np.array(np.where(mat.sum(1) == 0)[0]))
+    logging.info("number of samples with zero features: {} ({})".format(len(null_idxes), len(null_idxes) / len(true_labels)))
+
+    true_labels_tmp = true_labels.copy();
+    true_labels_tmp[null_idxes] = -1;
+    pos_idxes = np.where(true_labels_tmp == 1)[0]
+    r.shuffle(pos_idxes)
+    neg_idxes = np.where(true_labels_tmp == 0)[0]
+    r.shuffle(neg_idxes)
+
+    num_train_examples_pos = int(len(pos_idxes)*percentage_train)
+    num_train_examples_neg = int(len(neg_idxes)*percentage_train)
+
+    train_idxes = np.hstack((pos_idxes[:num_train_examples_pos], neg_idxes[:num_train_examples_neg]))
+    test_idxes = np.hstack((pos_idxes[num_train_examples_pos:], neg_idxes[num_train_examples_neg:]))
+
+    return train_idxes, test_idxes, null_idxes
+
 def get_stratified_train_test_indexes(true_labels, percentage_train = 0.8, random_seed=None):
     """
     """

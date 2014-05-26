@@ -87,22 +87,13 @@ try:
 
         print('Which feature sets do you want to use for classification?');
         print('\n'.join(['{}: {}'.format(i, x) for i,(x,_,_) in enumerate(matrices)]));
-        _in = raw_input('Enter space separated numbers (type <Enter> to use previous feature set, type q! to quit): ');
-        if _in == '':
+        _in = raw_input('Enter space separated numbers (type <Enter> to use previous feature set, type a for all feature sets, type q! to quit): ');
+        if not _in.strip():
             _in = ' '.join([str(f) for f in _f]);
         if _in == 'q!':
             raise KeyboardInterrupt();
         _f = [int(x) for x in _in.split(' ')];
         print('Feature matrices to use: {}'.format(_f));
-
-        if not '!' in _w1:
-            w1w2_idxs = _d_triples.get_right_tuple_ids((_w1,_w2));
-            print('Testing Context - ArgL - ArgR triples: \n{}'.format('\n'.join(['{} - {}'.format(i, _d_triples.get_triple(i)) for i in w1w2_idxs])));
-        else:
-            if 's' in _w1:
-                _, w1w2_idxs =  tc.get_stratified_train_test_indexes(true_labels, percentage_train=0.8, random_seed=623519);
-            if 'd' in _w1:
-                _, w1w2_idxs =  tc.get_fully_delex_train_test_indices_from_triples(_d_triples, true_labels, percentage_train_vocabulary=0.5, random_seed=623519);
 
         # stack
         logging.info('stacking matrices.');
@@ -118,6 +109,15 @@ try:
                 _colheader += ['[FS{} {}]: f_{}'.format(i, matrixdescr, x) for x in range(matrix.shape[1])];
         _colheader = np.array(_colheader);
         _mat = _mat.tocsr()[:,1:];
+
+        if not '!' in _w1:
+            w1w2_idxs = _d_triples.get_right_tuple_ids((_w1,_w2));
+            print('Testing Context - ArgL - ArgR triples: \n{}'.format('\n'.join(['{} - {}'.format(i, _d_triples.get_triple(i)) for i in w1w2_idxs])));
+        else:
+            if 's' in _w1:
+                _, w1w2_idxs, _ =  tc.get_stratified_train_test_indexes_notnull(_mat,true_labels, percentage_train=0.8, random_seed=623519);
+            if 'd' in _w1:
+                _, w1w2_idxs =  tc.get_fully_delex_train_test_indices_from_triples(_d_triples, true_labels, percentage_train_vocabulary=0.5, random_seed=623519);
 
         _train_idxes = np.delete(np.arange(0,len(_d_triples)), w1w2_idxs);
         _mat_train = _mat[_train_idxes,:];
