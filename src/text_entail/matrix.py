@@ -15,16 +15,25 @@ from scipy.io import mmwrite, mmread;
 import text_entail.dictionary as td;
 import text_entail.io as tio;
 
+
+def w2asfeature(d_triples, d_w2):
+    w2_mat = dok_matrix((len(d_triples), len(d_triples._r2ids)));
+    for w2, ids in d_triples._r2ids.items():
+        j = d_w2.add(w2);
+        for i in ids:
+            w2_mat[i,j] = 1;
+    return w2_mat;
+
 def binarize_sparse_matrix(mat):
     mat = mat.astype(bool);
     mat = mat.astype(np.float64);
     return mat;
-    
+
 def pred_vectors_with_context(preds_file, has_header=True):
 #   antibiotic	disease	X abolish Y	X administer in Y	TRUE
     logging.info('creating predicate pairs class vector \'{}\''.format(preds_file));
     temp = []
-    
+
     xy_predl_predr_entail = tio.read_preds_w_ctx(preds_file, has_header=has_header);
 
     d_triples = td.TripleDict(); # rows
@@ -58,7 +67,7 @@ def arg_l_arg_r_pairs_vector(args_file, file_contains_context = False, has_heade
             for l,r,e in tuples:
                 yield '', l, r, e;
         ctx_argl_argr_entail = append_empty_context(argl_argr_entail);
-    
+
     d_triples = td.TripleDict(); # rows
     duplicates = 0;
     contradicting_duplicates = 0;
@@ -77,7 +86,7 @@ def arg_l_arg_r_pairs_vector(args_file, file_contains_context = False, has_heade
     logging.info('finished creating arg pairs class vector \'{}\''.format(args_file));
     logging.info('found {} duplicate examples with {} having contradicting labels.'.format(duplicates, contradicting_duplicates));
     return vec, d_triples;
-        
+
 
 def arg_l_arg_r_asjo_matrix(row_indices, \
     jb_file, \
@@ -87,9 +96,9 @@ def arg_l_arg_r_asjo_matrix(row_indices, \
     transform_w2sig = lambda w2sig : w2sig, \
     mmfile_presuffix = '', \
     reload=False):
-    
+
     mm_file = jb_file + mmfile_presuffix + '.mm';
-    if os.path.exists(mm_file) and os.path.isfile(mm_file) and not reload:            
+    if os.path.exists(mm_file) and os.path.isfile(mm_file) and not reload:
         logging.info('corresponding matrix file already exists for \'{}\'.'.format(jb_file));
         logging.info('loading \'{}\'.'.format(mm_file));
         mat = mmread(mm_file);
@@ -97,10 +106,10 @@ def arg_l_arg_r_asjo_matrix(row_indices, \
             col_indices._id2w = cPickle.load(f);
         for i, w in enumerate(col_indices._id2w):
             col_indices._w2id[w] = i;
-        logging.info('finished loading \'{}\'.'.format(mm_file));    
-        return mat;        
-        
-    logging.info('creating arg pair feature matrix \'{}\''.format(jb_file));    
+        logging.info('finished loading \'{}\'.'.format(mm_file));
+        return mat;
+
+    logging.info('creating arg pair feature matrix \'{}\''.format(jb_file));
     mat = dok_matrix((num_rows,1),dtype=np.float64); # len(d_pairs) = number of rows
 
     j_bs = tio.read_jb_file_filter_by_jo(jb_file, lambda jo : transform_w1(jo) in row_indices);
@@ -114,7 +123,7 @@ def arg_l_arg_r_asjo_matrix(row_indices, \
                 mat[k,l] = float(s);
     logging.info('finished creating arg pair feature matrix \'{}\''.format(jb_file));
     logging.info('saving matrix to \'{}\'.'.format(mm_file));
-    with open(mm_file,'w') as f:    
+    with open(mm_file,'w') as f:
         mmwrite(f, mat);
     with open(mm_file+'i','w') as f:
         cPickle.dump(col_indices._id2w, f);
@@ -129,9 +138,9 @@ def arg_asjo_matrix(row_indices, \
     transform_w2sig = lambda w2sig : w2sig, \
     mmfile_presuffix = '', \
     reload=False):
-    
+
     mm_file = jb_file + mmfile_presuffix + '.mm';
-    if os.path.exists(mm_file) and os.path.isfile(mm_file) and not reload:            
+    if os.path.exists(mm_file) and os.path.isfile(mm_file) and not reload:
         logging.info('corresponding matrix file already exists for \'{}\'.'.format(jb_file));
         logging.info('loading \'{}\'.'.format(mm_file));
         mat = mmread(mm_file);
@@ -139,10 +148,10 @@ def arg_asjo_matrix(row_indices, \
             col_indices._id2w = cPickle.load(f);
         for i, w in enumerate(col_indices._id2w):
             col_indices._w2id[w] = i;
-        logging.info('finished loading \'{}\'.'.format(mm_file));    
-        return mat;        
-        
-    logging.info('creating arg feature matrix \'{}\''.format(jb_file));    
+        logging.info('finished loading \'{}\'.'.format(mm_file));
+        return mat;
+
+    logging.info('creating arg feature matrix \'{}\''.format(jb_file));
     mat = dok_matrix((num_rows,1),dtype=np.float64); # number of rows x 1
     j_bs = tio.read_jb_file_filter_by_jo(jb_file, lambda jo : transform_w1(jo) in row_indices);
     for j, bs in j_bs:
@@ -156,13 +165,13 @@ def arg_asjo_matrix(row_indices, \
                 mat[k,l] = float(s);
     logging.info('finished creating arg feature matrix \'{}\''.format(jb_file));
     logging.info('saving matrix to \'{}\'.'.format(mm_file));
-    with open(mm_file,'w') as f:    
+    with open(mm_file,'w') as f:
         mmwrite(f, mat);
     with open(mm_file+'i','w') as f:
         cPickle.dump(col_indices._id2w, f);
     logging.info('finshed saving matrix');
     return mat;
-    
+
 def arg_to_topic_matrix(\
     args,\
     word2topic_file, \
@@ -170,17 +179,17 @@ def arg_to_topic_matrix(\
     transform_w = lambda w: w, \
     mmfile_presuffix = '',\
     reload=False):
-    
-    mm_file = word2topic_file + mmfile_presuffix + '.mm';    
-    if os.path.exists(mm_file) and os.path.isfile(mm_file) and not reload:            
+
+    mm_file = word2topic_file + mmfile_presuffix + '.mm';
+    if os.path.exists(mm_file) and os.path.isfile(mm_file) and not reload:
         logging.info('corresponding matrix file already exists for \'{}\'.'.format(word2topic_file));
         logging.info('loading \'{}\'.'.format(mm_file));
         mat = mmread(mm_file);
-        logging.info('finished loading \'{}\'.'.format(mm_file));    
+        logging.info('finished loading \'{}\'.'.format(mm_file));
         return mat;
 
-    logging.info('creating topic feature matrix \'{}\''.format(word2topic_file));    
-    mat = dok_matrix((num_rows,1),dtype=np.float64); # number of rows x 1    
+    logging.info('creating topic feature matrix \'{}\''.format(word2topic_file));
+    mat = dok_matrix((num_rows,1),dtype=np.float64); # number of rows x 1
     w2t = tio.read_word2topicfile(word2topic_file);
     for w, t in w2t:
         w = transform_w(w);
@@ -194,11 +203,11 @@ def arg_to_topic_matrix(\
     logging.info('finished creating topic feature matrix \'{}\''.format(word2topic_file));
 
     logging.info('saving matrix to \'{}\'.'.format(word2topic_file));
-    with open(mm_file,'w') as f:    
+    with open(mm_file,'w') as f:
         mmwrite(f, mat);
     logging.info('finished saving matrix');
     return mat;
-    
+
 def arg_l_arg_r_to_topic_matrix(\
     row_indices,\
     pair2topic_file, \
@@ -206,17 +215,17 @@ def arg_l_arg_r_to_topic_matrix(\
     transform_w = lambda w1 : (w1[:w1.find('::@')], w1[w1.find('@::')+3:]),\
     mmfile_presuffix = '',\
     reload=False):
-    
-    mm_file = pair2topic_file + mmfile_presuffix + '.mm';    
+
+    mm_file = pair2topic_file + mmfile_presuffix + '.mm';
     if os.path.exists(mm_file) and os.path.isfile(mm_file) and not reload:
         logging.info('corresponding matrix file already exists for \'{}\'.'.format(pair2topic_file));
         logging.info('loading \'{}\'.'.format(mm_file));
         mat = mmread(mm_file);
-        logging.info('finished loading \'{}\'.'.format(mm_file));    
+        logging.info('finished loading \'{}\'.'.format(mm_file));
         return mat;
 
-    logging.info('creating topic feature matrix \'{}\''.format(pair2topic_file));    
-    mat = dok_matrix((num_rows,1),dtype=np.float64); # number of rows x 1    
+    logging.info('creating topic feature matrix \'{}\''.format(pair2topic_file));
+    mat = dok_matrix((num_rows,1),dtype=np.float64); # number of rows x 1
     w2t = tio.read_word2topicfile(pair2topic_file);
     for w, t in w2t:
         p = transform_w(w);
@@ -230,7 +239,7 @@ def arg_l_arg_r_to_topic_matrix(\
     logging.info('finished creating topic feature matrix \'{}\''.format(pair2topic_file));
 
     logging.info('saving matrix to \'{}\'.'.format(pair2topic_file));
-    with open(mm_file,'w') as f:    
+    with open(mm_file,'w') as f:
         mmwrite(f, mat);
     logging.info('finished saving matrix');
     return mat;
