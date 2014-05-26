@@ -109,17 +109,21 @@ def arg_l_arg_r_asjo_matrix(
     reload = False):
     """
     """
-    mm_file = jb_file + mmfile_presuffix + '.mm'
-    if os.path.exists(mm_file) and os.path.isfile(mm_file) and not reload:
-        logging.info("corresponding matrix file already exists for '{}'.".format(jb_file))
-        logging.info("loading '{}'.".format(mm_file))
-        mat = mmread(mm_file)
-        with open(mm_file+'i','r') as f:
-            col_indices._id2w = cPickle.load(f)
-        for i, w in enumerate(col_indices._id2w):
-            col_indices._w2id[w] = i
-        logging.info("finished loading '{}'.".format(mm_file))
-        return mat
+    mm_file = os.path.splitext( jb_file )[0] + mmfile_presuffix + '.mm';
+    if not reload:
+        # legacy condition ( for files with file extension inside filename )
+        if not os.path.exists(mm_file):
+            mm_file = jb_file + mmfile_presuffix + '.mm'
+        if os.path.exists(mm_file) and os.path.isfile(mm_file):
+            logging.info("corresponding matrix file already exists for '{}'.".format(jb_file))
+            logging.info("loading '{}'.".format(mm_file))
+            mat = mmread(mm_file)
+            with open(mm_file+'i','r') as f:
+                col_indices._id2w = cPickle.load(f)
+            for i, w in enumerate(col_indices._id2w):
+                col_indices._w2id[w] = i
+            logging.info("finished loading '{}'.".format(mm_file))
+            return mat
 
     logging.info("creating arg pair feature matrix '{}'".format(jb_file))
     mat = dok_matrix((num_rows,1),dtype=np.float64) # len(d_pairs) = number of rows
@@ -153,17 +157,21 @@ def arg_asjo_matrix(
     reload = False):
     """
     """
-    mm_file = jb_file + mmfile_presuffix + '.mm'
-    if os.path.exists(mm_file) and os.path.isfile(mm_file) and not reload:
-        logging.info("corresponding matrix file already exists for '{}'.".format(jb_file))
-        logging.info("loading '{}'.".format(mm_file))
-        mat = mmread(mm_file)
-        with open(mm_file+'i','r') as f:
-            col_indices._id2w = cPickle.load(f)
-        for i, w in enumerate(col_indices._id2w):
-            col_indices._w2id[w] = i
-        logging.info("finished loading '{}'.".format(mm_file))
-        return mat
+    mm_file = os.path.splitext( jb_file )[0] + mmfile_presuffix + '.mm';
+    if not reload:
+        # legacy condition ( for files with file extension inside filename )
+        if not os.path.exists(mm_file):
+            mm_file = jb_file + mmfile_presuffix + '.mm'
+        if os.path.exists(mm_file) and os.path.isfile(mm_file):
+            logging.info("corresponding matrix file already exists for '{}'.".format(jb_file))
+            logging.info("loading '{}'.".format(mm_file))
+            mat = mmread(mm_file)
+            with open(mm_file+'i','r') as f:
+                col_indices._id2w = cPickle.load(f)
+            for i, w in enumerate(col_indices._id2w):
+                col_indices._w2id[w] = i
+            logging.info("finished loading '{}'.".format(mm_file))
+            return mat
 
     logging.info("creating arg feature matrix '{}'".format(jb_file))
     mat = dok_matrix((num_rows,1),dtype=np.float64) # number of rows x 1
@@ -195,13 +203,17 @@ def arg_to_topic_matrix(
     reload = False):
     """
     """
-    mm_file = word2topic_file + mmfile_presuffix + '.mm'
-    if os.path.exists(mm_file) and os.path.isfile(mm_file) and not reload:
-        logging.info("corresponding matrix file already exists for '{}'.".format(word2topic_file))
-        logging.info("loading '{}'.".format(mm_file))
-        mat = mmread(mm_file)
-        logging.info("finished loading '{}'.".format(mm_file))
-        return mat
+    mm_file = os.path.splitext( word2topic_file )[0] + mmfile_presuffix + '.mm';
+    if not reload:
+        # legacy condition ( for files with file extension inside filename )
+        if not os.path.exists(mm_file):
+            mm_file = word2topic_file + mmfile_presuffix + '.mm'
+        if os.path.exists(mm_file) and os.path.isfile(mm_file):
+            logging.info("corresponding matrix file already exists for '{}'.".format(word2topic_file))
+            logging.info("loading '{}'.".format(mm_file))
+            mat = mmread(mm_file)
+            logging.info("finished loading '{}'.".format(mm_file))
+            return mat
 
     logging.info("creating topic feature matrix '{}'".format(word2topic_file))
     mat = dok_matrix((num_rows,1),dtype=np.float64) # number of rows x 1
@@ -232,13 +244,17 @@ def arg_l_arg_r_to_topic_matrix(
     reload = False):
     """
     """
-    mm_file = pair2topic_file + mmfile_presuffix + '.mm'
-    if os.path.exists(mm_file) and os.path.isfile(mm_file) and not reload:
-        logging.info("corresponding matrix file already exists for '{}'.".format(pair2topic_file))
-        logging.info("loading '{}'.".format(mm_file))
-        mat = mmread(mm_file)
-        logging.info("finished loading '{}'.".format(mm_file))
-        return mat
+    mm_file = os.path.splitext( pair2topic_file )[0] + mmfile_presuffix + '.mm';
+    if not reload:
+        # legacy condition ( for files with file extension inside filename )
+        if not os.path.exists(mm_file):
+            mm_file = pair2topic_file + mmfile_presuffix + '.mm'
+        if os.path.exists(mm_file) and os.path.isfile(mm_file):
+            logging.info("corresponding matrix file already exists for '{}'.".format(pair2topic_file))
+            logging.info("loading '{}'.".format(mm_file))
+            mat = mmread(mm_file)
+            logging.info("finished loading '{}'.".format(mm_file))
+            return mat
 
     logging.info("creating topic feature matrix '{}'".format(pair2topic_file))
     mat = dok_matrix((num_rows,1),dtype=np.float64) # number of rows x 1
