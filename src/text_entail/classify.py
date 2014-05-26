@@ -48,8 +48,10 @@ def run_classification_test(mat, true_labels, binarize=True,
     logging.info('preparing train and test set.')
     train_indexes, test_indexes = get_stratified_train_test_indexes(true_labels, percentage_train, random_seed)
     # train_indexes, test_indexes = get_train_test_indexes_presplit(d_args)
-    # train_indexes, test_indexes = get_train_test_indices_from_triples(d_triples, true_labels, percentage_train, random_seed)
-    train_mat, test_mat, true_train_labels, true_test_labels = split_matrix_to_train_and_test(mat, true_labels, train_indexes, test_indexes, print_stat=print_train_test_set_stat)
+    # train_indexes, test_indexes = \
+    #    get_train_test_indices_from_triples(d_triples, true_labels, percentage_train, random_seed)
+    train_mat, test_mat, true_train_labels, true_test_labels = \
+        split_matrix_to_train_and_test(mat, true_labels, train_indexes, test_indexes, print_stat=print_train_test_set_stat)
     model = classify(train_mat, test_mat, true_train_labels, true_test_labels, test_thresholds)
     return model
 
@@ -162,7 +164,8 @@ def split_matrix_to_train_and_test(mat, true_labels, train_indexes, test_indexes
 
     if print_stat:
         print('======')
-        print('  percentage of training examples: {}\n  num training examples: {} ({}/{})\n  num testing examples:  {} ({}/{})'.format(\
+        print('  percentage of training examples: {}\n  num training examples: \
+            {} ({}/{})\n  num testing examples:  {} ({}/{})'.format(\
             len(train_indexes) / len(true_labels),\
             len(train_indexes),\
             len(np.where(true_train_labels > 0)[0]),\
