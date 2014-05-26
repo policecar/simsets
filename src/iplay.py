@@ -124,7 +124,7 @@ try:
         _mat_train = _mat[_train_idxes,:];
         _train_labels = true_labels[_train_idxes];
         _mat_test = _mat[_test_idxes,:];
-        _test_labels = true_labels[w1w2_idxs];
+        _test_labels = true_labels[_test_idxes];
 
         predicted_test_labels, model = tc.clazzify(_mat_train, _mat_test, _train_labels);
 
@@ -137,7 +137,7 @@ try:
             coef_samples = _mat_test.multiply(model.coef_).A;
             for i in range(coef_samples.shape[0]):
                 sorted_idxs = np.argsort(np.abs(np.array(coef_samples[i])))[::-1]; # sort and reverse indices, model.coef_ is just a (1 x n) matrix
-                print('Coefficients {} (predicted: {}, real: {}):\n\t{}'.format(_d_triples.get_triple(w1w2_idxs[i]), predicted_test_labels[i], _test_labels[i], '\n\t'.join(['{:+.3f} {:6d} {}'.format(coef_samples[i][j], j, _colheader[j]) for j in sorted_idxs[:20]])));
+                print('Coefficients {} (predicted: {}, real: {}):\n\t{}'.format(_d_triples.get_triple(_test_idxes[i]), predicted_test_labels[i], _test_labels[i], '\n\t'.join(['{:+.3f} {:6d} {}'.format(coef_samples[i][j], j, _colheader[j]) for j in sorted_idxs[:20]])));
 
 
 except KeyboardInterrupt:
