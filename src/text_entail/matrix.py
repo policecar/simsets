@@ -109,7 +109,7 @@ def arg_l_arg_r_asjo_matrix(
     reload = False):
     """
     """
-    mm_file = os.path.splitext( jb_file )[0] + mmfile_presuffix + '.mm';
+    mm_file = os.path.splitext( jb_file )[0] + mmfile_presuffix + '.mm'
     if not reload:
         # legacy condition ( for files with file extension inside filename )
         if not os.path.exists(mm_file):
@@ -157,7 +157,7 @@ def arg_asjo_matrix(
     reload = False):
     """
     """
-    mm_file = os.path.splitext( jb_file )[0] + mmfile_presuffix + '.mm';
+    mm_file = os.path.splitext( jb_file )[0] + mmfile_presuffix + '.mm'
     if not reload:
         # legacy condition ( for files with file extension inside filename )
         if not os.path.exists(mm_file):
@@ -203,7 +203,7 @@ def arg_to_topic_matrix(
     reload = False):
     """
     """
-    mm_file = os.path.splitext( word2topic_file )[0] + mmfile_presuffix + '.mm';
+    mm_file = os.path.splitext( word2topic_file )[0] + mmfile_presuffix + '.mm'
     if not reload:
         # legacy condition ( for files with file extension inside filename )
         if not os.path.exists(mm_file):
@@ -244,7 +244,7 @@ def arg_l_arg_r_to_topic_matrix(
     reload = False):
     """
     """
-    mm_file = os.path.splitext( pair2topic_file )[0] + mmfile_presuffix + '.mm';
+    mm_file = os.path.splitext( pair2topic_file )[0] + mmfile_presuffix + '.mm'
     if not reload:
         # legacy condition ( for files with file extension inside filename )
         if not os.path.exists(mm_file):
