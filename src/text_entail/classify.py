@@ -8,15 +8,20 @@ Created on Thu Apr  3 09:43:23 2014
 
 from __future__ import print_function;
 from __future__ import division;
+
 import logging;
+
 from sklearn.linear_model.logistic import LogisticRegression;
-import sklearn.metrics as metric;
-import text_entail.matrix as tm;
-import text_entail.io as tio;
+import sklearn.metrics as metrics;
 import numpy as np;
 import random as rand;
 
+import text_entail.matrix as tm;
+import text_entail.io as tio;
+
 def run_baseline_classification_test(true_labels):
+    """
+    """
     #### create train and test split
     logging.info('preparing train and test set.');
     # always true baseline
@@ -31,6 +36,8 @@ def run_baseline_classification_test(true_labels):
 def run_classification_test(mat, true_labels, binarize=True,
     percentage_train=0.8, print_train_test_set_stat = True,
     test_thresholds=False, random_seed=None, d_args=None, d_triples=None):
+    """
+    """
     ## binarize full matrix if desired
     if binarize:
         logging.info('binarizing feature matrix');
@@ -47,6 +54,8 @@ def run_classification_test(mat, true_labels, binarize=True,
     return model;
 
 def get_stratified_train_test_indexes(true_labels, percentage_train = 0.8, random_seed=None):
+    """
+    """
     r = rand.Random(x=random_seed);
     pos_idxes = np.where(true_labels > 0)[0];
     r.shuffle(pos_idxes);
@@ -61,14 +70,14 @@ def get_stratified_train_test_indexes(true_labels, percentage_train = 0.8, rando
 
     return train_idxes, test_idxes;
 
-def get_fully_delex_train_test_indices_from_triples( d_triples, y_true, percentage_train=0.8,
-    random_seed=None ):
-    '''
+def get_fully_delex_train_test_indices_from_triples( d_triples, y_true, 
+    percentage_train=0.8, random_seed=None ):
+    """
     Splits train and test set such as to maximize non-overlap of vocabulary;
     ie. the vocabulary of words is completely distinct in train and test set
-    '''
+    """
 
-    v = set(d_triples._l2ids.keys()) | set(d_triples._m2ids.keys()) |  set(d_triples._r2ids.keys())
+    v = set(d_triples._l2ids.keys()) | set(d_triples._m2ids.keys()) | set(d_triples._r2ids.keys())
     v = list(v)
 
     r = rand.Random(x=random_seed);
@@ -125,7 +134,8 @@ def get_train_test_indices_from_triples( d_triples, y_true, percentage_train=0.8
 
 
 def get_train_test_indexes_presplit(d_triples):
-
+    """
+    """
     t1 = tio.read_args_w_ctx('../data/updates/4/args_v2_am.tsv', has_header=False);
     train_ids = [];
     for ctx, arg_l, arg_r, __ in t1:
@@ -141,7 +151,10 @@ def get_train_test_indexes_presplit(d_triples):
     return train_ids, test_ids;
 
 
-def split_matrix_to_train_and_test(mat, true_labels, train_indexes, test_indexes, print_stat=False):
+def split_matrix_to_train_and_test(mat, true_labels, train_indexes, test_indexes, 
+    print_stat=False):
+    """
+    """
     train_mat = mat[train_indexes,:];
     true_train_labels = true_labels[train_indexes];
     test_mat = mat[test_indexes,:];
@@ -162,7 +175,8 @@ def split_matrix_to_train_and_test(mat, true_labels, train_indexes, test_indexes
     return train_mat, test_mat, true_train_labels, true_test_labels;
 
 def clazzify(train_mat, test_mat, true_train_labels):
-
+    """
+    """
     # learn
     logging.info('learning...');
     model = LogisticRegression(random_state=17, penalty='l1');
@@ -176,12 +190,15 @@ def clazzify(train_mat, test_mat, true_train_labels):
 
     return predicted_test_labels, model;
 
-def classify(train_mat, test_mat, true_train_labels, true_test_labels, test_thresholds=False):
+def classify(train_mat, test_mat, true_train_labels, true_test_labels, 
+    test_thresholds=False):
+    """
+    """
     predicted_test_labels, model = clazzify(train_mat, test_mat, true_train_labels);
     calculate_statistics(true_test_labels, predicted_test_labels);
 
-###################
-## test
+    ###################
+    ## test
     if test_thresholds:
         logging.info('testing thresholds');
         predicted_test_labels = model.predict_proba(test_mat);
@@ -231,18 +248,25 @@ def classify(train_mat, test_mat, true_train_labels, true_test_labels, test_thre
     return model;
 
 def calculate_statistics(true_test_labels, predicted_test_labels):
-    conf_matrix = metric.confusion_matrix(true_test_labels, predicted_test_labels, labels=[1,0]);
-    acc = metric.accuracy_score(true_test_labels, predicted_test_labels);
-#    metric.precision_recall_curve()
-    prec_1 = metric.recall_score(true_test_labels, predicted_test_labels, pos_label=1);
-    rec_1 = metric.precision_score(true_test_labels, predicted_test_labels, pos_label=1);
-    f1_1 = metric.f1_score(true_test_labels, predicted_test_labels, pos_label=1);
+    """
+    """
+    conf_matrix = metrics.confusion_matrix(true_test_labels, predicted_test_labels, labels=[1,0])
+    accuracy = metrics.accuracy_score(true_test_labels, predicted_test_labels)
+    avg_precision = metrics.average_precision_score( true_test_labels, predicted_test_labels )
 
     print('======');
-    print('  TP: {}\n  FP: {}\n  FN: {}\n  TN: {}\n'.format(conf_matrix[0,0], conf_matrix[1,0], conf_matrix[0,1], conf_matrix[1,1]));
-    print('  Acc: {}\n'.format(acc));
-    print('  Pr(1): {}\n  Re(1): {}\n  F1(1): {}\n'.format(prec_1, rec_1, f1_1));
-#    print('  Pr(0): {}\n  Re(0): {}\n  F1(0): {}\n'.format(prec_0, rec_0, f1_0));
-#    print('  Pr_w(0.5): {}\n  Re_w(0.5): {}\n  F1_w(0.5): {}\n'.format(prec, rec, f1));
-#    print('  Pr_w(c): {}\n  Re_w(c): {}\n  F1_w(c): {}'.format(prec_w, rec_w, f1_w));
+    print()
+    print('   TP: {}\n   FP: {}\n   FN: {}\n   TN: {}\n'.format(conf_matrix[0,0], 
+        conf_matrix[1,0], conf_matrix[0,1], conf_matrix[1,1]));
+    print('  Acc: {}'.format(accuracy));
+    print('   AP: {}'.format(avg_precision))
+    print()
+    # print('  Pr(1): {}\n  Re(1): {}\n  F1(1): {}\n'.format(prec_1, rec_1, f1_1));
+    # print('  Pr(0): {}\n  Re(0): {}\n  F1(0): {}\n'.format(prec_0, rec_0, f1_0));
+    # print('  Pr_w(0.5): {}\n  Re_w(0.5): {}\n  F1_w(0.5): {}\n'.format(prec, rec, f1));
+    # print('  Pr_w(c): {}\n  Re_w(c): {}\n  F1_w(c): {}'.format(prec_w, rec_w, f1_w));
+
+    # compute classification report ( incl. precision, recall, f_score etc. )
+    report = metrics.classification_report( true_test_labels, predicted_test_labels )
+    print( report )
     print('======');
