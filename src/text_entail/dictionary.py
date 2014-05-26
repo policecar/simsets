@@ -6,8 +6,6 @@ Created on Sun Mar 30 09:32:32 2014
 """
 
 class Dict():
-
-    UNK = '<unk>';
     
     def __init__(self):
         self._id2w = [];
@@ -24,12 +22,12 @@ class Dict():
     def getid(self, w):
         if w in self._w2id:
             return self._w2id[w];
-        return -1;
+        return None;
 
     def getword(self, i):
         if i < len(self._id2w) and i >= 0:
             return self._id2w[i];
-        return Dict.UNK;
+        return None;
         
     def __len__(self):
         return len(self._id2w);
@@ -38,8 +36,6 @@ class Dict():
         return w in self._w2id;
         
 class TupleDict():
-
-    UNK = ('<unk>','<unk>');
     
     def __init__(self):
         self._id2t = [];
@@ -67,22 +63,22 @@ class TupleDict():
     def get_pair_id(self, t):
         if t in self._t2id:
             return self._t2id[t];
-        return -1;
+        return None;
 
     def get_pair(self, i):
         if i < len(self._id2t) and i >= 0:
             return self._id2t[i];
-        return TupleDict.UNK;
+        return None;
         
     def get_left_element_ids(self, leftelement):
         if leftelement in self._l2id:
             return self._l2id[leftelement];
-        return [-1,];
+        return [];
         
     def get_right_element_ids(self, rightelement):
         if rightelement in self._r2id:
             return self._r2id[rightelement];
-        return [-1,];
+        return [];
 
     def __len__(self):
         return len(self._id2t);
@@ -92,8 +88,6 @@ class TupleDict():
 
 
 class TripleDict():
-
-    UNK = ('<unk>','<unk>','<unk>');
     
     def __init__(self):
         self._id2triple = [];
@@ -138,37 +132,37 @@ class TripleDict():
     def get_triple_id(self, triple):
         if triple in self._triple2id:
             return self._triple2id[triple];
-        return -1;
+        return None;
 
     def get_triple(self, i):
         if i < len(self._id2triple) and i >= 0:
             return self._id2triple[i];
-        return TripleDict.UNK;
+        return None;
 
     def get_left_tuple_ids(self, left_tuple):
         if left_tuple in self._ltuple2ids:
             return self._ltuple2ids[left_tuple];
-        return [-1,];
+        return [];
         
     def get_right_tuple_ids(self, right_tuple):
         if right_tuple in self._rtuple2ids:
             return self._rtuple2ids[right_tuple];
-        return [-1,];
+        return [];
         
     def get_left_element_ids(self, leftelement):
         if leftelement in self._l2ids:
             return self._l2ids[leftelement];
-        return [-1,];
+        return [];
 
     def get_middle_element_ids(self, middle_element):
         if middle_element in self._m2ids:
             return self._m2ids[middle_element];
-        return [-1,];
+        return [];
         
     def get_right_element_ids(self, rightelement):
         if rightelement in self._r2ids:
             return self._r2ids[rightelement];
-        return [-1,];
+        return [];
 
     def __len__(self):
         return len(self._id2triple);
