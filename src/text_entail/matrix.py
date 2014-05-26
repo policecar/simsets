@@ -30,7 +30,7 @@ def binarize_sparse_matrix(mat):
     return mat;
 
 def pred_vectors_with_context(preds_file, has_header=True):
-#   antibiotic	disease	X abolish Y	X administer in Y	TRUE
+    # antibiotic    disease X abolish Y X administer in Y   TRUE
     logging.info('creating predicate pairs class vector \'{}\''.format(preds_file));
     temp = []
 
@@ -97,7 +97,8 @@ def arg_l_arg_r_asjo_matrix(row_indices, \
     mmfile_presuffix = '', \
     reload=False):
 
-    mm_file = jb_file + mmfile_presuffix + '.mm';
+    # strip file extension before adding suffix to filename
+    mm_file = os.path.splitext( jb_file )[0] + mmfile_presuffix + '.mm';
     if os.path.exists(mm_file) and os.path.isfile(mm_file) and not reload:
         logging.info('corresponding matrix file already exists for \'{}\'.'.format(jb_file));
         logging.info('loading \'{}\'.'.format(mm_file));
@@ -139,7 +140,7 @@ def arg_asjo_matrix(row_indices, \
     mmfile_presuffix = '', \
     reload=False):
 
-    mm_file = jb_file + mmfile_presuffix + '.mm';
+    mm_file = os.path.splitext( jb_file )[0] + mmfile_presuffix + '.mm';
     if os.path.exists(mm_file) and os.path.isfile(mm_file) and not reload:
         logging.info('corresponding matrix file already exists for \'{}\'.'.format(jb_file));
         logging.info('loading \'{}\'.'.format(mm_file));
@@ -180,7 +181,7 @@ def arg_to_topic_matrix(\
     mmfile_presuffix = '',\
     reload=False):
 
-    mm_file = word2topic_file + mmfile_presuffix + '.mm';
+    mm_file = os.path.splitext( word2topic_file )[0] + mmfile_presuffix + '.mm';
     if os.path.exists(mm_file) and os.path.isfile(mm_file) and not reload:
         logging.info('corresponding matrix file already exists for \'{}\'.'.format(word2topic_file));
         logging.info('loading \'{}\'.'.format(mm_file));
@@ -216,7 +217,7 @@ def arg_l_arg_r_to_topic_matrix(\
     mmfile_presuffix = '',\
     reload=False):
 
-    mm_file = pair2topic_file + mmfile_presuffix + '.mm';
+    mm_file = os.path.splitext( pair2topic_file )[0] + mmfile_presuffix + '.mm';
     if os.path.exists(mm_file) and os.path.isfile(mm_file) and not reload:
         logging.info('corresponding matrix file already exists for \'{}\'.'.format(pair2topic_file));
         logging.info('loading \'{}\'.'.format(mm_file));
