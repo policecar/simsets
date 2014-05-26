@@ -39,7 +39,7 @@ def binarize_sparse_matrix(mat):
 def pred_vectors_with_context(preds_file, has_header=True):
     """
     """
-    logging.info('creating predicate pairs class vector \'{}\''.format(preds_file))
+    logging.info("creating predicate pairs class vector '{}'".format(preds_file))
     temp = []
 
     xy_predl_predr_entail = tio.read_preds_w_ctx(preds_file, has_header=has_header)
@@ -60,14 +60,14 @@ def pred_vectors_with_context(preds_file, has_header=True):
         else:
             temp.append(1 if entailing.strip().lower() == 'true' else 0)
     vec = np.array(temp, dtype=np.float64)
-    logging.info('finished creating arg pairs class vector \'{}\''.format(preds_file))
-    logging.info('found {} duplicate examples with {} having contradicting labels.'.format(duplicates, contradicting_duplicates))
+    logging.info("finished creating arg pairs class vector '{}'".format(preds_file))
+    logging.info("found {} duplicate examples with {} having contradicting labels.".format(duplicates, contradicting_duplicates))
     return vec, d_triples
 
 def arg_l_arg_r_pairs_vector(args_file, file_contains_context=False, has_header=True):
     """
     """
-    logging.info('creating arg pairs class vector \'{}\''.format(args_file))
+    logging.info("creating arg pairs class vector '{}'".format(args_file))
     temp = []
     if file_contains_context:
         ctx_argl_argr_entail = tio.read_args_w_ctx(args_file, has_header=has_header)
@@ -93,8 +93,8 @@ def arg_l_arg_r_pairs_vector(args_file, file_contains_context=False, has_header=
         else:
             temp.append(1 if entailing.strip().lower() == 'true' else 0)
     vec = np.array(temp, dtype=np.float64)
-    logging.info('finished creating arg pairs class vector \'{}\''.format(args_file))
-    logging.info('found {} duplicate examples with {} having contradicting labels.'.format(duplicates, contradicting_duplicates))
+    logging.info("finished creating arg pairs class vector '{}'".format(args_file))
+    logging.info("found {} duplicate examples with {} having contradicting labels.".format(duplicates, contradicting_duplicates))
     return vec, d_triples
 
 
@@ -111,17 +111,17 @@ def arg_l_arg_r_asjo_matrix(
     """
     mm_file = jb_file + mmfile_presuffix + '.mm'
     if os.path.exists(mm_file) and os.path.isfile(mm_file) and not reload:
-        logging.info('corresponding matrix file already exists for \'{}\'.'.format(jb_file))
-        logging.info('loading \'{}\'.'.format(mm_file))
+        logging.info("corresponding matrix file already exists for '{}'.".format(jb_file))
+        logging.info("loading '{}'.".format(mm_file))
         mat = mmread(mm_file)
         with open(mm_file+'i','r') as f:
             col_indices._id2w = cPickle.load(f)
         for i, w in enumerate(col_indices._id2w):
             col_indices._w2id[w] = i
-        logging.info('finished loading \'{}\'.'.format(mm_file))
+        logging.info("finished loading '{}'.".format(mm_file))
         return mat
 
-    logging.info('creating arg pair feature matrix \'{}\''.format(jb_file))
+    logging.info("creating arg pair feature matrix '{}'".format(jb_file))
     mat = dok_matrix((num_rows,1),dtype=np.float64) # len(d_pairs) = number of rows
 
     j_bs = tio.read_jb_file_filter_by_jo(jb_file, lambda jo : transform_w1(jo) in row_indices)
@@ -133,13 +133,13 @@ def arg_l_arg_r_asjo_matrix(
                 mat.resize((mat.shape[0],l+1))
             for k in ks:
                 mat[k,l] = float(s)
-    logging.info('finished creating arg pair feature matrix \'{}\''.format(jb_file))
-    logging.info('saving matrix to \'{}\'.'.format(mm_file))
+    logging.info("finished creating arg pair feature matrix '{}'".format(jb_file))
+    logging.info("saving matrix to '{}'.".format(mm_file))
     with open(mm_file,'w') as f:
         mmwrite(f, mat)
     with open(mm_file+'i','w') as f:
         cPickle.dump(col_indices._id2w, f)
-    logging.info('finshed saving matrix')
+    logging.info("finshed saving matrix")
     return mat
 
 def arg_asjo_matrix(
@@ -155,17 +155,17 @@ def arg_asjo_matrix(
     """
     mm_file = jb_file + mmfile_presuffix + '.mm'
     if os.path.exists(mm_file) and os.path.isfile(mm_file) and not reload:
-        logging.info('corresponding matrix file already exists for \'{}\'.'.format(jb_file))
-        logging.info('loading \'{}\'.'.format(mm_file))
+        logging.info("corresponding matrix file already exists for '{}'.".format(jb_file))
+        logging.info("loading '{}'.".format(mm_file))
         mat = mmread(mm_file)
         with open(mm_file+'i','r') as f:
             col_indices._id2w = cPickle.load(f)
         for i, w in enumerate(col_indices._id2w):
             col_indices._w2id[w] = i
-        logging.info('finished loading \'{}\'.'.format(mm_file))
+        logging.info("finished loading '{}'.".format(mm_file))
         return mat
 
-    logging.info('creating arg feature matrix \'{}\''.format(jb_file))
+    logging.info("creating arg feature matrix '{}'".format(jb_file))
     mat = dok_matrix((num_rows,1),dtype=np.float64) # number of rows x 1
     j_bs = tio.read_jb_file_filter_by_jo(jb_file, lambda jo : transform_w1(jo) in row_indices)
     for j, bs in j_bs:
@@ -177,13 +177,13 @@ def arg_asjo_matrix(
                 mat.resize((mat.shape[0],l+1))
             for k in ks:
                 mat[k,l] = float(s)
-    logging.info('finished creating arg feature matrix \'{}\''.format(jb_file))
-    logging.info('saving matrix to \'{}\'.'.format(mm_file))
+    logging.info("finished creating arg feature matrix '{}'".format(jb_file))
+    logging.info("saving matrix to '{}'.".format(mm_file))
     with open(mm_file,'w') as f:
         mmwrite(f, mat)
     with open(mm_file+'i','w') as f:
         cPickle.dump(col_indices._id2w, f)
-    logging.info('finshed saving matrix')
+    logging.info("finshed saving matrix")
     return mat
 
 def arg_to_topic_matrix(
@@ -197,13 +197,13 @@ def arg_to_topic_matrix(
     """
     mm_file = word2topic_file + mmfile_presuffix + '.mm'
     if os.path.exists(mm_file) and os.path.isfile(mm_file) and not reload:
-        logging.info('corresponding matrix file already exists for \'{}\'.'.format(word2topic_file))
-        logging.info('loading \'{}\'.'.format(mm_file))
+        logging.info("corresponding matrix file already exists for '{}'.".format(word2topic_file))
+        logging.info("loading '{}'.".format(mm_file))
         mat = mmread(mm_file)
-        logging.info('finished loading \'{}\'.'.format(mm_file))
+        logging.info("finished loading '{}'.".format(mm_file))
         return mat
 
-    logging.info('creating topic feature matrix \'{}\''.format(word2topic_file))
+    logging.info("creating topic feature matrix '{}'".format(word2topic_file))
     mat = dok_matrix((num_rows,1),dtype=np.float64) # number of rows x 1
     w2t = tio.read_word2topicfile(word2topic_file)
     for w, t in w2t:
@@ -215,12 +215,12 @@ def arg_to_topic_matrix(
             mat.resize((mat.shape[0],t+1))
         for k in ks:
             mat[k,t] = 1
-    logging.info('finished creating topic feature matrix \'{}\''.format(word2topic_file))
+    logging.info("finished creating topic feature matrix '{}'".format(word2topic_file))
 
-    logging.info('saving matrix to \'{}\'.'.format(word2topic_file))
+    logging.info("saving matrix to '{}'.".format(word2topic_file))
     with open(mm_file,'w') as f:
         mmwrite(f, mat)
-    logging.info('finished saving matrix')
+    logging.info("finished saving matrix")
     return mat
 
 def arg_l_arg_r_to_topic_matrix(
@@ -234,13 +234,13 @@ def arg_l_arg_r_to_topic_matrix(
     """
     mm_file = pair2topic_file + mmfile_presuffix + '.mm'
     if os.path.exists(mm_file) and os.path.isfile(mm_file) and not reload:
-        logging.info('corresponding matrix file already exists for \'{}\'.'.format(pair2topic_file))
-        logging.info('loading \'{}\'.'.format(mm_file))
+        logging.info("corresponding matrix file already exists for '{}'.".format(pair2topic_file))
+        logging.info("loading '{}'.".format(mm_file))
         mat = mmread(mm_file)
-        logging.info('finished loading \'{}\'.'.format(mm_file))
+        logging.info("finished loading '{}'.".format(mm_file))
         return mat
 
-    logging.info('creating topic feature matrix \'{}\''.format(pair2topic_file))
+    logging.info("creating topic feature matrix '{}'".format(pair2topic_file))
     mat = dok_matrix((num_rows,1),dtype=np.float64) # number of rows x 1
     w2t = tio.read_word2topicfile(pair2topic_file)
     for w, t in w2t:
@@ -252,10 +252,10 @@ def arg_l_arg_r_to_topic_matrix(
             mat.resize((mat.shape[0],t+1))
         for k in ks:
             mat[k,t] = 1
-    logging.info('finished creating topic feature matrix \'{}\''.format(pair2topic_file))
+    logging.info("finished creating topic feature matrix '{}'".format(pair2topic_file))
 
-    logging.info('saving matrix to \'{}\'.'.format(pair2topic_file))
+    logging.info("saving matrix to '{}'.".format(pair2topic_file))
     with open(mm_file,'w') as f:
         mmwrite(f, mat)
-    logging.info('finished saving matrix')
+    logging.info("finished saving matrix")
     return mat
