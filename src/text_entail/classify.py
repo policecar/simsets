@@ -73,7 +73,7 @@ def get_stratified_train_test_indexes(true_labels, percentage_train = 0.8, rando
     return train_idxes, test_idxes
 
 def get_fully_delex_train_test_indices_from_triples( d_triples, y_true,
-    percentage_train=0.8, random_seed=None ):
+    percentage_train_vocabulary=0.5, random_seed=None ):
     """
     Splits train and test set such as to maximize non-overlap of vocabulary;
     ie. the vocabulary of words is completely distinct in train and test set
@@ -85,18 +85,21 @@ def get_fully_delex_train_test_indices_from_triples( d_triples, y_true,
     r = rand.Random(x=random_seed)
     r.shuffle(v)
 
-    num_train = int(len(v)*percentage_train)
+    num_train = int(len(v)*percentage_train_vocabulary)
+    v_train = v[:num_train]
+    logging.info("size of training/test vocabulary: {}/{} ({})".format(len(v_train), len(v)-len(v_train), len(v_train) / len(v)))
 
-    idx_train = set()
-    for w in v[:num_train]:
-        if w in d_triples._m2ids:
-            idx_train.update(d_triples._m2ids[w])
-        if w in d_triples._r2ids:
-            idx_train.update(d_triples._r2ids[w])
+    idx_train = list()
+    idx_test = list()
+    for i, (_, w1, w2) in enumerate(d_triples._id2triple):
+        if w1 in v_train or w2 in v_train:
+            idx_train.append(i);
+        else:
+            idx_test.append(i);
 
-    idx_test = set(range(len(d_triples))) - idx_train
+    logging.info("size of training/test set: {}/{} ({})".format(len(idx_train), len(idx_test), len(idx_train) / len(y_true)))
 
-    return np.array(list(idx_train)), np.array(list(idx_test))
+    return np.array(idx_train), np.array(idx_test)
 
 def get_train_test_indices_from_triples( d_triples, y_true, percentage_train=0.8,
     random_seed=None ):

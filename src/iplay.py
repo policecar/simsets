@@ -102,8 +102,7 @@ try:
             if 's' in _w1:
                 _, w1w2_idxs =  tc.get_stratified_train_test_indexes(true_labels, percentage_train=0.8, random_seed=623519);
             if 'd' in _w1:
-                _, w1w2_idxs =  tc.get_fully_delex_train_test_indices_from_triples(_d_triples, true_labels, percentage_train=0.8, random_seed=623519);
-
+                _, w1w2_idxs =  tc.get_fully_delex_train_test_indices_from_triples(_d_triples, true_labels, percentage_train_vocabulary=0.5, random_seed=623519);
 
         # stack
         logging.info('stacking matrices.');
