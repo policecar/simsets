@@ -112,17 +112,18 @@ try:
 
         if not '!' in _w1:
             w1w2_idxs = _d_triples.get_right_tuple_ids((_w1,_w2));
+            _train_idxes = np.delete(np.arange(0,len(_d_triples)), w1w2_idxs);
+            _test_idxes = w1w2_idxs;
             print('Testing Context - ArgL - ArgR triples: \n{}'.format('\n'.join(['{} - {}'.format(i, _d_triples.get_triple(i)) for i in w1w2_idxs])));
         else:
             if 's' in _w1:
-                _, w1w2_idxs, _ =  tc.get_stratified_train_test_indexes_notnull(_mat,true_labels, percentage_train=0.8, random_seed=623519);
+                _train_idxes, _test_idxes, _ =  tc.get_stratified_train_test_indexes_notnull(_mat,true_labels, percentage_train=0.8, random_seed=623519);
             if 'd' in _w1:
-                _, w1w2_idxs =  tc.get_fully_delex_train_test_indices_from_triples(_d_triples, true_labels, percentage_train_vocabulary=0.5, random_seed=623519);
+                _train_idxes, _test_idxes =  tc.get_fully_delex_train_test_indices_from_triples(_d_triples, true_labels, percentage_train_vocabulary=0.5, random_seed=623519);
 
-        _train_idxes = np.delete(np.arange(0,len(_d_triples)), w1w2_idxs);
         _mat_train = _mat[_train_idxes,:];
         _train_labels = true_labels[_train_idxes];
-        _mat_test = _mat[w1w2_idxs,:];
+        _mat_test = _mat[_test_idxes,:];
         _test_labels = true_labels[w1w2_idxs];
 
         predicted_test_labels, model = tc.clazzify(_mat_train, _mat_test, _train_labels);
