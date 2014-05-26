@@ -20,13 +20,15 @@ reload(logging); logging.basicConfig(format='%(asctime)s - %(message)s', level=l
 
 def readFirstInput(w1):
     while True:
-        _in = raw_input("Enter a term (type <Enter> for previous term, type ? to view available terms, type cs! for random stratified classification (80/20), type q! to quit): ");
+        _in = raw_input("Enter a term (type <Enter> for previous term, type ? to view available terms, type cs! for random stratified classification (80/20), type cd! for delex classification (80/20), type q! to quit): ");
         if _in == '':
             _in = w1;
         if _in == 'q!':
             raise KeyboardInterrupt();
         if _in == 'cs!':
-            return None;
+            return _in;
+        if _in == 'cd!':
+            return _in;
         if _in == '?':
             for c in range(0,len(_v),20):
                 print('\n'.join(_v[c:c+20]));
@@ -78,7 +80,7 @@ _f = [0,];
 try:
     while True:
         _w1 = readFirstInput(_w1);
-        if _w1:
+        if not '!' in _w1:
             print('first word is: ' + _w1);
             _w2 = readSecondInput(_w1, _w2);
             print('second word is: ' + _w2);
@@ -93,11 +95,14 @@ try:
         _f = [int(x) for x in _in.split(' ')];
         print('Feature matrices to use: {}'.format(_f));
 
-        if _w1:
+        if not '!' in _w1:
             w1w2_idxs = _d_triples.get_right_tuple_ids((_w1,_w2));
             print('Testing Context - ArgL - ArgR triples: \n{}'.format('\n'.join(['{} - {}'.format(i, _d_triples.get_triple(i)) for i in w1w2_idxs])));
         else:
-            _, w1w2_idxs =  tc.get_stratified_train_test_indexes(true_labels, percentage_train=0.8, random_seed=623519);
+            if 's' in _w1:
+                _, w1w2_idxs =  tc.get_stratified_train_test_indexes(true_labels, percentage_train=0.8, random_seed=623519);
+            if 'd' in _w1:
+                _, w1w2_idxs =  tc.get_fully_delex_train_test_indices_from_triples(_d_triples, true_labels, percentage_train=0.8, random_seed=623519);
 
 
         # stack
@@ -126,13 +131,14 @@ try:
         sorted_idxs = np.argsort(np.abs(model.coef_[0]))[::-1]; # sort and reverse indices, model.coef_ is just a (1 x n) matrix
         print('Coefficients:\n\t{}\n\t{}'.format(model.intercept_[0], '\n\t'.join(['{:+.3f} {:6d} {}'.format(model.coef_[0][i], i, _colheader[i]) for i in sorted_idxs[:20]])));
 
-        if _w1:
+        if '!' in _w1:
+            tc.calculate_statistics(_test_labels, predicted_test_labels)
+        else:
             coef_samples = _mat_test.multiply(model.coef_).A;
             for i in range(coef_samples.shape[0]):
                 sorted_idxs = np.argsort(np.abs(np.array(coef_samples[i])))[::-1]; # sort and reverse indices, model.coef_ is just a (1 x n) matrix
                 print('Coefficients {} (predicted: {}, real: {}):\n\t{}'.format(_d_triples.get_triple(w1w2_idxs[i]), predicted_test_labels[i], _test_labels[i], '\n\t'.join(['{:+.3f} {:6d} {}'.format(coef_samples[i][j], j, _colheader[j]) for j in sorted_idxs[:20]])));
-        else:
-            tc.calculate_statistics(_test_labels, predicted_test_labels)
+
 
 except KeyboardInterrupt:
     pass;

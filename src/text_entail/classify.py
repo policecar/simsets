@@ -72,14 +72,14 @@ def get_stratified_train_test_indexes(true_labels, percentage_train = 0.8, rando
 
     return train_idxes, test_idxes
 
-def get_fully_delex_train_test_indices_from_triples( d_triples, y_true, 
+def get_fully_delex_train_test_indices_from_triples( d_triples, y_true,
     percentage_train=0.8, random_seed=None ):
     """
     Splits train and test set such as to maximize non-overlap of vocabulary;
     ie. the vocabulary of words is completely distinct in train and test set
     """
 
-    v = set(d_triples._l2ids.keys()) | set(d_triples._m2ids.keys()) | set(d_triples._r2ids.keys())
+    v = set(d_triples._m2ids.keys()) | set(d_triples._r2ids.keys())
     v = list(v)
 
     r = rand.Random(x=random_seed)
@@ -89,8 +89,6 @@ def get_fully_delex_train_test_indices_from_triples( d_triples, y_true,
 
     idx_train = set()
     for w in v[:num_train]:
-        if w in d_triples._l2ids:
-            idx_train.update(d_triples._l2ids[w])
         if w in d_triples._m2ids:
             idx_train.update(d_triples._m2ids[w])
         if w in d_triples._r2ids:
@@ -153,7 +151,7 @@ def get_train_test_indexes_presplit(d_triples):
     return train_ids, test_ids
 
 
-def split_matrix_to_train_and_test(mat, true_labels, train_indexes, test_indexes, 
+def split_matrix_to_train_and_test(mat, true_labels, train_indexes, test_indexes,
     print_stat=False):
     """
     """
@@ -193,7 +191,7 @@ def clazzify(train_mat, test_mat, true_train_labels):
 
     return predicted_test_labels, model
 
-def classify(train_mat, test_mat, true_train_labels, true_test_labels, 
+def classify(train_mat, test_mat, true_train_labels, true_test_labels,
     test_thresholds=False):
     """
     """
@@ -259,7 +257,7 @@ def calculate_statistics(true_test_labels, predicted_test_labels):
 
     print('======')
     print()
-    print('   TP: {}\n   FP: {}\n   FN: {}\n   TN: {}\n'.format(conf_matrix[0,0], 
+    print('   TP: {}\n   FP: {}\n   FN: {}\n   TN: {}\n'.format(conf_matrix[0,0],
         conf_matrix[1,0], conf_matrix[0,1], conf_matrix[1,1]))
     print('  Acc: {}'.format(accuracy))
     print('   AP: {}'.format(avg_precision))
