@@ -28,8 +28,8 @@ def run_baseline_classification_test(true_labels):
     true_labels_ = np.ones(len(true_labels)) - true_labels;
     calculate_statistics(true_labels_, predicted);
 
-def run_classification_test(mat, true_labels, binarize=True, 
-    percentage_train=0.8, print_train_test_set_stat = True, 
+def run_classification_test(mat, true_labels, binarize=True,
+    percentage_train=0.8, print_train_test_set_stat = True,
     test_thresholds=False, random_seed=None, d_args=None, d_triples=None):
     ## binarize full matrix if desired
     if binarize:
@@ -61,34 +61,57 @@ def get_stratified_train_test_indexes(true_labels, percentage_train = 0.8, rando
 
     return train_idxes, test_idxes;
 
+def get_fully_delex_train_test_indices_from_triples( d_triples, y_true, percentage_train=0.8,
+    random_seed=None ):
+    '''
+    Splits train and test set such as to maximize non-overlap of vocabulary;
+    ie. the vocabulary of words is completely distinct in train and test set
+    '''
+
+    v = set(d_triples._l2ids.keys()) | set(d_triples._m2ids.keys()) |  set(d_triples._r2ids.keys())
+    v = list(v)
+
+    r = rand.Random(x=random_seed);
+    r.shuffle(v)
+
+    num_train = int(len(v)*percentage_train);
+
+    idx_train = set();
+    for w in v[:num_train]:
+        if w in d_triples._l2ids:
+            idx_train.update(d_triples._l2ids[w]);
+        if w in d_triples._m2ids:
+            idx_train.update(d_triples._m2ids[w])
+        if w in d_triples._r2ids:
+            idx_train.update(d_triples._r2ids[w])
+
+    idx_test = set(range(len(d_triples))) - idx_train
+
+    return np.array(list(idx_train)), np.array(list(idx_test))
+
 def get_train_test_indices_from_triples( d_triples, y_true, percentage_train=0.8,
     random_seed=None ):
     """
     Splits train and test set such as to maximize non-overlap of vocabulary;
     ie. allows a right lexeme to only be either in the train or in the test set.
     """
-    # got thru triples and collect unique right words
-    w2 = set()
-    for i in range( len( d_triples )):
-        w2.add( d_triples.get_triple(i)[2] )
-    w2 = list( w2 )
- 
+    # get right words
+    w2 = d_triples._r2ids.keys();
+
     # for every right word collect the ids of the triples it occurs in
-    w2idx = {}
-    for w in w2:
-        w2idx[w] = d_triples.get_right_element_ids(w)
- 
+    w2idx = d_triples._r2ids;
+
     # shuffle w2
     r = rand.Random( x=random_seed )
     r.shuffle( w2 )
- 
+
     #TODO: the split into train and test data does not yet consider classes
- 
+
     # split right words into train and test set according to percentage_train
     split_num = int( len( w2 ) * percentage_train )
     w2_train = w2[:split_num]
     w2_test  = w2[split_num:]
- 
+
     idx_train = []
     for w in w2_train:
         idx_train.extend( w2idx[w] )
@@ -96,9 +119,9 @@ def get_train_test_indices_from_triples( d_triples, y_true, percentage_train=0.8
     idx_test  = []
     for w in w2_test:
         idx_test.extend( w2idx[w] )
- 
+
     # return respective ids as train and test indices
-    return np.asarray( idx_train ), np.asarray( idx_test )    
+    return np.asarray( idx_train ), np.asarray( idx_test )
 
 
 def get_train_test_indexes_presplit(d_triples):
