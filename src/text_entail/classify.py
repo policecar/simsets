@@ -55,16 +55,16 @@ def run_classification_test(mat, true_labels, binarize=True,
     model = classify(train_mat, test_mat, true_train_labels, true_test_labels, test_thresholds)
     return model
 
-def get_stratified_train_test_indexes_notnull(mat, true_labels, percentage_train = 0.8, random_seed=None):
+def get_stratified_train_test_indexes_notzero(mat, true_labels, percentage_train = 0.8, random_seed=None):
     """
     """
     r = rand.Random(x=random_seed)
 
-    null_idxes = np.squeeze(np.array(np.where(mat.sum(1) == 0)[0]))
-    logging.info("number of samples with zero features: {} ({})".format(len(null_idxes), len(null_idxes) / len(true_labels)))
+    zero_idxes = np.squeeze(np.array(np.where(mat.sum(1) == 0)[0]))
+    logging.info("number of samples with zero features: {} ({})".format(len(zero_idxes), len(zero_idxes) / len(true_labels)))
 
     true_labels_tmp = true_labels.copy();
-    true_labels_tmp[null_idxes] = -1;
+    true_labels_tmp[zero_idxes] = -1;
     pos_idxes = np.where(true_labels_tmp == 1)[0]
     r.shuffle(pos_idxes)
     neg_idxes = np.where(true_labels_tmp == 0)[0]
@@ -76,7 +76,9 @@ def get_stratified_train_test_indexes_notnull(mat, true_labels, percentage_train
     train_idxes = np.hstack((pos_idxes[:num_train_examples_pos], neg_idxes[:num_train_examples_neg]))
     test_idxes = np.hstack((pos_idxes[num_train_examples_pos:], neg_idxes[num_train_examples_neg:]))
 
-    return train_idxes, test_idxes, null_idxes
+    logging.info("size of training/test set: {}/{} ({})".format(len(train_idxes), len(test_idxes), len(train_idxes) / len(true_labels)))
+
+    return train_idxes, test_idxes, zero_idxes
 
 def get_stratified_train_test_indexes(true_labels, percentage_train = 0.8, random_seed=None):
     """
@@ -123,6 +125,40 @@ def get_fully_delex_train_test_indices_from_triples( d_triples, y_true,
     logging.info("size of training/test set: {}/{} ({})".format(len(idx_train), len(idx_test), len(idx_train) / len(y_true)))
 
     return np.array(idx_train), np.array(idx_test)
+
+def get_fully_delex_train_test_indices_from_triples_notzero(d_triples, mat, y_true,
+    percentage_train_vocabulary=0.5, random_seed=None ):
+    """
+    Splits train and test set such as to maximize non-overlap of vocabulary;
+    ie. the vocabulary of words is completely distinct in train and test set
+    """
+
+    v = set(d_triples._m2ids.keys()) | set(d_triples._r2ids.keys())
+    v = list(v)
+
+    r = rand.Random(x=random_seed)
+    r.shuffle(v)
+
+    num_train = int(len(v)*percentage_train_vocabulary)
+    v_train = v[:num_train]
+    logging.info("size of training/test vocabulary: {}/{} ({})".format(len(v_train), len(v)-len(v_train), len(v_train) / len(v)))
+
+    idx_train = list()
+    idx_test = list()
+    idx_zero = list()
+    for i, (_, w1, w2) in enumerate(d_triples._id2triple):
+        if mat[i,:].sum() == 0:
+            idx_zero.append(i);
+            continue;
+        if w1 in v_train or w2 in v_train:
+            idx_train.append(i);
+        else:
+            idx_test.append(i);
+
+    logging.info("number of samples with zero features: {} ({})".format(len(idx_zero), len(idx_zero) / len(y_true)))
+    logging.info("size of training/test set: {}/{} ({})".format(len(idx_train), len(idx_test), len(idx_train) / len(y_true)))
+
+    return np.array(idx_train), np.array(idx_test), np.array(idx_zero)
 
 def get_train_test_indices_from_triples( d_triples, y_true, percentage_train=0.8,
     random_seed=None ):
