@@ -117,13 +117,21 @@ def get_fully_delex_train_test_indices_from_triples( d_triples, y_true,
 
     idx_train = list()
     idx_test = list()
+    idx_zero = list()
+    filtered_by_delex = list()
     for i, (_, w1, w2) in enumerate(d_triples._id2triple):
         if w1 in v_train and w2 in v_train:
             idx_train.append(i);
         elif w1 in v_test and w2 in v_test:
-            idx_test.append(i);
+            idx_test.append(i)
+        else:
+            filtered_by_delex.append(i)
 
-    logging.info("size of training/test set: {}/{} ({})".format(len(idx_train), len(idx_test), len(idx_train) / len(y_true)))
+    usable_dataset_size = len(idx_train) + len(idx_test)
+    logging.info("number of samples with zero features: {} ({})".format(len(idx_zero), len(idx_zero) / len(y_true)))
+    logging.info("number of samples filtered by delexicalization: {} ({})".format(len(filtered_by_delex), len(filtered_by_delex) / len(y_true)))
+    logging.info("number of usable samples: {}/{} ({})".format(usable_dataset_size, len(y_true), usable_dataset_size / len(y_true)))
+    logging.info("size of training|test set: {}|{} ({})".format(len(idx_train), len(idx_test), usable_dataset_size))
 
     return np.array(idx_train), np.array(idx_test)
 
@@ -148,18 +156,23 @@ def get_fully_delex_train_test_indices_from_triples_notzero(d_triples, mat, y_tr
     idx_train = list()
     idx_test = list()
     idx_zero = list()
+    filtered_by_delex = list()
     for i, (_, w1, w2) in enumerate(d_triples._id2triple):
         if mat[i,:].sum() == 0:
-            idx_zero.append(i);
-            continue;
+            idx_zero.append(i)
+            continue
         if w1 in v_train and w2 in v_train:
             idx_train.append(i);
         elif w1 in v_test and w2 in v_test:
-            idx_test.append(i);
+            idx_test.append(i)
+        else:
+            filtered_by_delex.append(i)
 
+    usable_dataset_size = len(idx_train) + len(idx_test)
     logging.info("number of samples with zero features: {} ({})".format(len(idx_zero), len(idx_zero) / len(y_true)))
-    logging.info("number of usable samples: {}/{} ({})".format(len(idx_train) + len(idx_test), len(y_true), (len(idx_train)+len(idx_train)) / len(y_true)))
-    logging.info("size of training|test set: {}|{} ({})".format(len(idx_train), len(idx_test), len(idx_train) + len(idx_test)))
+    logging.info("number of samples filtered by delexicalization: {} ({})".format(len(filtered_by_delex), len(filtered_by_delex) / len(y_true)))
+    logging.info("number of usable samples: {}/{} ({})".format(usable_dataset_size, len(y_true), usable_dataset_size / len(y_true)))
+    logging.info("size of training|test set: {}|{} ({})".format(len(idx_train), len(idx_test), usable_dataset_size))
 
     return np.array(idx_train), np.array(idx_test), np.array(idx_zero)
 
