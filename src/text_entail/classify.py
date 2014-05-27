@@ -112,14 +112,15 @@ def get_fully_delex_train_test_indices_from_triples( d_triples, y_true,
 
     num_train = int(len(v)*percentage_train_vocabulary)
     v_train = v[:num_train]
+    v_test = v[num_train:]
     logging.info("size of training/test vocabulary: {}/{} ({})".format(len(v_train), len(v)-len(v_train), len(v_train) / len(v)))
 
     idx_train = list()
     idx_test = list()
     for i, (_, w1, w2) in enumerate(d_triples._id2triple):
-        if w1 in v_train or w2 in v_train:
+        if w1 in v_train and w2 in v_train:
             idx_train.append(i);
-        else:
+        elif w1 in v_test and w2 in v_test:
             idx_test.append(i);
 
     logging.info("size of training/test set: {}/{} ({})".format(len(idx_train), len(idx_test), len(idx_train) / len(y_true)))
@@ -141,6 +142,7 @@ def get_fully_delex_train_test_indices_from_triples_notzero(d_triples, mat, y_tr
 
     num_train = int(len(v)*percentage_train_vocabulary)
     v_train = v[:num_train]
+    v_test = v[num_train:]
     logging.info("size of training/test vocabulary: {}/{} ({})".format(len(v_train), len(v)-len(v_train), len(v_train) / len(v)))
 
     idx_train = list()
@@ -150,13 +152,14 @@ def get_fully_delex_train_test_indices_from_triples_notzero(d_triples, mat, y_tr
         if mat[i,:].sum() == 0:
             idx_zero.append(i);
             continue;
-        if w1 in v_train or w2 in v_train:
+        if w1 in v_train and w2 in v_train:
             idx_train.append(i);
-        else:
+        elif w1 in v_test and w2 in v_test:
             idx_test.append(i);
 
     logging.info("number of samples with zero features: {} ({})".format(len(idx_zero), len(idx_zero) / len(y_true)))
-    logging.info("size of training/test set: {}/{} ({})".format(len(idx_train), len(idx_test), len(idx_train) / len(y_true)))
+    logging.info("number of usable samples: {}/{} ({})".format(len(idx_train) + len(idx_test), len(y_true), (len(idx_train)+len(idx_train)) / len(y_true)))
+    logging.info("size of training|test set: {}|{} ({})".format(len(idx_train), len(idx_test), len(idx_train) + len(idx_test)))
 
     return np.array(idx_train), np.array(idx_test), np.array(idx_zero)
 
