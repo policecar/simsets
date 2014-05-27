@@ -20,7 +20,7 @@ reload(logging); logging.basicConfig(format='%(asctime)s - %(message)s', level=l
 
 def readFirstInput(w1):
     while True:
-        _in = raw_input("Enter a term (type <Enter> for previous term, type ? to view available terms, type cs! (csn!) for random stratified classification (80/20), type cd! (cdn!) for delex classification (80/20), type q! to quit): ");
+        _in = raw_input("Enter a term (type <Enter> for previous term, type ? to view available terms, type cs! for random stratified classification (80/20), type cd! for delex classification (80/20), type q! to quit): ");
         if _in == '':
             _in = w1;
         if _in == 'q!':
@@ -92,7 +92,7 @@ try:
             _in = ' '.join([str(f) for f in _f]);
         if _in == 'q!':
             raise KeyboardInterrupt();
-        if '!' in _in:
+        if 'a' in _in:
             _in = ' '.join([str(f) for f in range(len(matrices))]);
         _f = [int(x) for x in _in.split(' ')];
         print('Using feature matrices: {}'.format(_f));
