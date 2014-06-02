@@ -39,10 +39,16 @@ def load_classification_data():
 def load_matrices(d_triples):
     matrices = [];
 
+    ## just the left argument as feature
+    logging.info('creating w1 as feature matrix');
+    d_w1 = td.Dict();
+    w1_mat = tm.w1Asfeature(d_triples, d_w1);
+    matrices.append(('W1 as Feature', w1_mat, d_w1));
+
     ## just the right argument as feature
     logging.info('creating w2 as feature matrix');
     d_w2 = td.Dict();
-    w2_mat = tm.w2asfeature(d_triples, d_w2);
+    w2_mat = tm.w2Asfeature(d_triples, d_w2);
     matrices.append(('W2 as Feature', w2_mat, d_w2));
 
 

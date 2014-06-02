@@ -14,12 +14,20 @@ import cPickle
 import numpy as np
 from scipy.sparse import dok_matrix
 from scipy.io import mmwrite, mmread
-
 import text_entail.dictionary as td
 import text_entail.io as tio
 
+def w1Asfeature(d_triples, d_w1):
+    """
+    """
+    w1_mat = dok_matrix((len(d_triples), len(d_triples._m2ids)))
+    for w1, ids in d_triples._m2ids.items():
+        j = d_w1.add(w1)
+        for i in ids:
+            w1_mat[i,j] = 1
+    return w1_mat
 
-def w2asfeature(d_triples, d_w2):
+def w2Asfeature(d_triples, d_w2):
     """
     """
     w2_mat = dok_matrix((len(d_triples), len(d_triples._r2ids)))
@@ -28,6 +36,16 @@ def w2asfeature(d_triples, d_w2):
         for i in ids:
             w2_mat[i,j] = 1
     return w2_mat
+
+def ctxAsfeature(d_triples, d_ctx):
+    """
+    """
+    ctx_mat = dok_matrix((len(d_triples), len(d_triples._l2ids)))
+    for ctx, ids in d_triples._l2ids.items():
+        j = d_ctx.add(ctx)
+        for i in ids:
+            ctx_mat[i,j] = 1
+    return ctx_mat
 
 def binarize_sparse_matrix(mat):
     """
@@ -99,13 +117,13 @@ def arg_l_arg_r_pairs_vector(args_file, file_contains_context=False, has_header=
 
 
 def arg_l_arg_r_asjo_matrix(
-    row_indices, 
-    jb_file, 
-    num_rows, 
-    col_indices, 
-    transform_w1 = lambda w1 : (w1[:w1.find('::@')], w1[w1.find('@::')+3:]), 
-    transform_w2sig = lambda w2sig : w2sig, 
-    mmfile_presuffix = '', 
+    row_indices,
+    jb_file,
+    num_rows,
+    col_indices,
+    transform_w1 = lambda w1 : (w1[:w1.find('::@')], w1[w1.find('@::')+3:]),
+    transform_w2sig = lambda w2sig : w2sig,
+    mmfile_presuffix = '',
     reload = False):
     """
     """
@@ -147,13 +165,13 @@ def arg_l_arg_r_asjo_matrix(
     return mat
 
 def arg_asjo_matrix(
-    row_indices, 
-    col_indices, 
-    jb_file, 
-    num_rows, 
-    transform_w1 = lambda w1 : w1, 
-    transform_w2sig = lambda w2sig : w2sig, 
-    mmfile_presuffix = '', 
+    row_indices,
+    col_indices,
+    jb_file,
+    num_rows,
+    transform_w1 = lambda w1 : w1,
+    transform_w2sig = lambda w2sig : w2sig,
+    mmfile_presuffix = '',
     reload = False):
     """
     """
@@ -195,11 +213,11 @@ def arg_asjo_matrix(
     return mat
 
 def arg_to_topic_matrix(
-    args, 
-    word2topic_file, 
-    num_rows, 
-    transform_w = lambda w: w, 
-    mmfile_presuffix = '', 
+    args,
+    word2topic_file,
+    num_rows,
+    transform_w = lambda w: w,
+    mmfile_presuffix = '',
     reload = False):
     """
     """
@@ -236,11 +254,11 @@ def arg_to_topic_matrix(
     return mat
 
 def arg_l_arg_r_to_topic_matrix(
-    row_indices, 
-    pair2topic_file, 
-    num_rows, 
-    transform_w = lambda w1 : (w1[:w1.find('::@')], w1[w1.find('@::')+3:]), 
-    mmfile_presuffix = '', 
+    row_indices,
+    pair2topic_file,
+    num_rows,
+    transform_w = lambda w1 : (w1[:w1.find('::@')], w1[w1.find('@::')+3:]),
+    mmfile_presuffix = '',
     reload = False):
     """
     """
