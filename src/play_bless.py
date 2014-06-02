@@ -29,17 +29,21 @@ except ImportError:
 
 # filename specs for labels, contexts, similarities and topic modeling ( LDA )
 # fn_labels   = os.path.join( BASE_DIR, '../bless/bless_nouns_coord_vs_rest.tsv' )
-fn_labels   = os.path.join( BASE_DIR, '../bless/bless_nouns_hyper_vs_rest.tsv' )
+# fn_labels   = os.path.join( BASE_DIR, '../bless/bless_nouns_hyper_vs_rest.tsv' )
 # fn_labels   = os.path.join( BASE_DIR, '../bless/bless_nouns_mero_vs_rest.tsv' )
 
-fn_ctx_word = os.path.join( BASE_DIR, 'ctx/ctx_lmi_pruned.gz' )
-fn_ctx_pair = os.path.join( BASE_DIR, 'ctx/ctx_lmi_pruned_flipped.gz' )
+fn_labels   = os.path.join( BASE_DIR, '../bless/bless_wacky_140521_coord.tsv' )
+# fn_labels   = os.path.join( BASE_DIR, '../bless/bless_wacky_140521_hyper.tsv' )
+# fn_labels   = os.path.join( BASE_DIR, '../bless/bless_wacky_140521_mero.tsv' )
+
+fn_ctx_word = os.path.join( BASE_DIR, 'ctx/ctx_lmi.gz' )
+fn_ctx_pair = os.path.join( BASE_DIR, 'ctx/ctx_lmi_flipped.gz' )
 fn_sim_word = os.path.join( BASE_DIR, 'sim/sim.gz' )
 fn_sim_pair = os.path.join( BASE_DIR, 'sim/sim_flipped.gz' )
 fn_lda_word = os.path.join( BASE_DIR, 'lda/model_final_doc2topic_5_5' )
 fn_lda_pair = os.path.join( BASE_DIR, 'lda/model_final_doc2topic_5_5_flipped' )
 
-refresh = True
+refresh = False
 ctx = True
 sim = False
 lda = False
@@ -163,7 +167,7 @@ mat = sparse.hstack(( mat, m_ctx_pair ))
 embed()
 
 # context features of words
-mat = sparse.hstack(( mat, mb_ctx_w1.astype( np.float64 )))
+# mat = sparse.hstack(( mat, mb_ctx_w1.astype( np.float64 )))
 # mat = sparse.hstack(( mat, mb_ctx_w2.astype( np.float64 )))
 # mat = sparse.hstack(( mat, mb_ctx_union_w1_w2.astype( np.float64 )))
 # mat = sparse.hstack(( mat, mb_ctx_diff_w1_w2.astype( np.float64 )))
@@ -208,7 +212,7 @@ model = tc.run_classification_test( mat, y_true, binarize=True, # True
 logging.info( "inspect some of the features" )
 # replicate hstacking here to attain names
 # names = d_ctx_word._id2w
-names = d_ctx_pair._id2w + d_ctx_word._id2w
+names = d_ctx_pair._id2w + d_ctx_word._id2w + d_ctx_word._id2w 
 # names = d_ctx_pair._id2w + d_sim_pair._id2w
 # names = d_topic_pair._id2w
 # names = d_ctx_pair._id2w + d_ctx_word._id2w
