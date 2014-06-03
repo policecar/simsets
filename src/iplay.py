@@ -12,8 +12,9 @@ import scipy.sparse as sparse;
 import numpy as np;
 
 # change dataset here
-import ent_args_dataset  as clc;
-#import bless_dataset  as clc;
+#import ent_args_dataset  as clc;
+#import ent_args_ctx_dataset  as clc;
+import bless_dataset  as clc;
 
 
 reload(logging); logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.DEBUG)
@@ -133,10 +134,11 @@ try:
         sorted_idxs = np.argsort(np.abs(model.coef_[0]))[::-1]; # sort and reverse indices, model.coef_ is just a (1 x n) matrix
         print('Coefficients:\n\t{}\n\t{}'.format(model.intercept_[0], '\n\t'.join(['{:+.3f} {:6d} {}'.format(model.coef_[0][i], i, _colheader[i]) for i in sorted_idxs[:20]])));
 
-        _in = raw_input('Enter y to predict zero-vector with default class (0) (press <Enter> or n to not classify zero-vectors, type q! to quit): ');
+
+        _in = raw_input('Enter y to predict {} zero-vector(s) with default class (0) (press <Enter> or n to not classify zero-vectors, type q! to quit): '.format(len(_zero_v_idxes)));
         if _in == 'q!':
             raise KeyboardInterrupt();
-        if _in.strip().lower() == 'y':
+        if _in.strip().lower() == 'y' and len(_zero_v_idxes) > 0:
             _test_idxes = np.hstack((_test_idxes, _zero_v_idxes));
             _test_labels = np.hstack((_test_labels, true_labels[_zero_v_idxes]));
             predicted_test_labels = np.hstack((predicted_test_labels, np.zeros(len(_zero_v_idxes))));
