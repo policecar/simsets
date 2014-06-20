@@ -29,7 +29,7 @@ def read_args_w_ctx(argfile, has_header=True):
             ctx, arg_l, arg_r, entail = line.rstrip().split('\t',3);
             yield ctx, arg_l, arg_r, entail;
     logging.info('finished reading file \'{}\''.format(argfile));
-    
+
 def read_preds_w_ctx(predfile, has_header=True):
 # X	Y	PRED_L	   PRED_R	ENTAILING
     logging.info('reading file \'{}\''.format(predfile));
@@ -59,7 +59,7 @@ def read_jb_file(fn):
         if w_:
             yield w_, tuple(similar_w_);
     logging.info('finished reading file \'{}\''.format(fn));
-            
+
 #def read_dictrelevant_jb_file(fn, d):
 #    with gzip.open(fn) if fn.endswith('.gz') else open(fn) as f:
 #        w_ = None;
@@ -78,7 +78,7 @@ def read_jb_file(fn):
 #            similar_w_.append((similar_w, sig));
 #        if w_:
 #            yield w_, tuple(similar_w_);
-            
+
 def read_jb_file_filter_by_jo(fn, filter_by_jo_fun = lambda jo : False):
     logging.info('reading jb file \'{}\''.format(fn));
     with gzip.open(fn) if fn.endswith('.gz') else open(fn) as f:
@@ -111,7 +111,7 @@ def read_jb_file_filter_by_jo(fn, filter_by_jo_fun = lambda jo : False):
 #            d.add(arg_r);
 #    logging.info('finished file \'{}\''.format(argfile));
 #    return d;
-    
+
 def binarize_mmfile(mm_file):
     logging.info('reading file \'{}\''.format(mm_file));
     new_mm_file = mm_file[:mm_file.rfind('.')] + '.bin' + mm_file[mm_file.rfind('.'):];
@@ -141,4 +141,13 @@ def read_word2topicfile(word2topic_file):
             word, topicid = line.rstrip().split('\t',1);
             yield word, int(topicid);
     logging.info('finished reading file \'{}\''.format(word2topic_file));
- 
+
+def read_word2topicvectorfile(word2topic_file):
+    logging.info('reading file \'{}\''.format(word2topic_file));
+    with gzip.open(word2topic_file) if word2topic_file.endswith('.gz') else open(word2topic_file) as f:
+        for line in f:
+            word, topic = line.rstrip().split('\t',1);
+            yield word, topic;
+    logging.info('finished reading file \'{}\''.format(word2topic_file));
+
+

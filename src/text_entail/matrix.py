@@ -293,3 +293,45 @@ def arg_l_arg_r_to_topic_matrix(
         mmwrite(f, mat)
     logging.info("finished saving matrix")
     return mat
+
+def topic_vector_matrix(
+    row_indices,
+    word2topicvector_file,
+    num_rows,
+    transform_w = lambda w: w,
+    mmfile_presuffix = '',
+    reload = False):
+    """
+    """
+    mm_file = os.path.splitext(word2topicvector_file)[0] + mmfile_presuffix + '.mm'
+    if not reload:
+#        # legacy condition ( for files with file extension inside filename )
+#        if not os.path.exists(mm_file):
+#            mm_file = word2topic_file + mmfile_presuffix + '.mm'
+        if os.path.exists(mm_file) and os.path.isfile(mm_file):
+            logging.info("corresponding matrix file already exists for '{}'.".format(word2topicvector_file))
+            logging.info("loading '{}'.".format(mm_file))
+            mat = mmread(mm_file)
+            logging.info("finished loading '{}'.".format(mm_file))
+            return mat
+
+    logging.info("creating topic vector feature matrix '{}'".format(word2topicvector_file))
+    mat = dok_matrix((num_rows,1),dtype=np.float64) # number of rows x 1
+    w2t = tio.read_word2topicfile(word2topicvector_file)
+    for w, t in w2t:
+        w = transform_w(w)
+        if not w in row_indices:
+            continue
+        t = np.array(t.split(' '), dtype=np.float)
+        ks = row_indices[w]
+        if mat.shape[1] < len(t):
+            mat.resize((mat.shape[0],len(t)))
+        for k in ks:
+            mat[k,:] = t
+    logging.info("finished creating topic feature matrix '{}'".format(word2topicvector_file))
+
+    logging.info("saving matrix to '{}'.".format(word2topicvector_file))
+    with open(mm_file,'w') as f:
+        mmwrite(f, mat)
+    logging.info("finished saving matrix")
+    return mat
