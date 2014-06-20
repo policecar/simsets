@@ -9,6 +9,7 @@ from __future__ import print_function;
 import text_entail.classify as tc;
 import logging;
 import scipy.sparse as sparse;
+import re;
 import numpy as np;
 
 # change dataset here
@@ -17,7 +18,9 @@ import numpy as np;
 import bless_dataset  as clc;
 
 
-reload(logging); logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.DEBUG)
+reload(logging); logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.DEBUG);
+
+_range_pattern = re.compile('\s?(?P<from>\d+)\s*-\s*(?P<to>\d+)\s?');
 
 def readFirstInput(w1):
     while True:
@@ -86,16 +89,34 @@ try:
             _w2 = readSecondInput(_w1, _w2);
             print('second word is: ' + _w2);
 
-        print('Which feature sets do you want to use for classification?');
-        print('\n'.join(['{}: {}'.format(i, x) for i,(x,_,_) in enumerate(matrices)]));
-        _in = raw_input('Enter space separated numbers (type <Enter> to use previous feature set, type a! for all feature sets, type q! to quit): ');
-        if not _in.strip():
-            _in = ' '.join([str(f) for f in _f]);
-        if _in == 'q!':
-            raise KeyboardInterrupt();
-        if 'a' in _in:
-            _in = ' '.join([str(f) for f in range(len(matrices))]);
-        _f = [int(x) for x in _in.split(' ')];
+        while True:
+            print('Which feature sets do you want to use for classification?');
+            print('\n'.join(['{}: {}'.format(i, x) for i,(x,_,_) in enumerate(matrices)]));
+            _in = raw_input('Enter space separated numbers (type <Enter> to use previous feature set, type a! for all feature sets, type q! to quit): ');
+            try:
+                if not _in.strip():
+                    _in = ' '.join([str(f) for f in _f]);
+                if _in == 'q!':
+                    raise KeyboardInterrupt();
+                if 'a' in _in:
+                    _in = ' '.join([str(f) for f in range(len(matrices))]);
+
+                _new_in = _in;
+                m = _range_pattern.search(_in);
+                while m:
+                    f = m.group('from');
+                    t = m.group('to');
+                    print('{} {}'.format(f,t))
+                    l = [str(i) for i in range(int(f),int(t)+1)];
+                    print('{}'.format(l));
+                    _new_in = _new_in.replace(m.group(), ' '.join(l));
+                    m = _range_pattern.search(_in, m.end());
+                _in = _new_in;
+                _f = [int(x) for x in _in.split(' ')];
+                break;
+            except Exception as e:
+                print('Something went wrong, please try again. ({}: {})'.format(type(e), e.message));
+
         print('Using feature matrices: {}'.format(_f));
 
         # stack
