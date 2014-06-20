@@ -317,7 +317,7 @@ def topic_vector_matrix(
 
     logging.info("creating topic vector feature matrix '{}'".format(word2topicvector_file))
     mat = dok_matrix((num_rows,1),dtype=np.float64) # number of rows x 1
-    w2t = tio.read_word2topicfile(word2topicvector_file)
+    w2t = tio.read_word2topicvectorfile(word2topicvector_file)
     for w, t in w2t:
         w = transform_w(w)
         if not w in row_indices:
