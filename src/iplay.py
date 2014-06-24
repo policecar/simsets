@@ -7,16 +7,16 @@ Created on Wed May  9 13:44:30 2014
 """
 from __future__ import print_function;
 import text_entail.classify as tc;
+import text_entail.matrix as tm;
 import logging;
 import scipy.sparse as sparse;
 import re;
 import numpy as np;
 
-# change dataset here
-#import ent_args_dataset  as clc;
-#import ent_args_ctx_dataset  as clc;
+## change dataset here
+# import ent_args_dataset  as clc;
+# import ent_args_ctx_dataset  as clc;
 import bless_dataset  as clc;
-
 
 reload(logging); logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.DEBUG);
 
@@ -146,6 +146,13 @@ try:
             if 'd' in _w1:
                 _train_idxes, _test_idxes, _zero_v_idxes =  tc.get_fully_delex_train_test_indices_from_triples_notzero(_d_triples, _mat, true_labels, percentage_train_vocabulary=0.5, random_seed=623519);
 #                _test_idxes = np.hstack((_test_idxes, _zero_v_idxes));
+
+        _in = raw_input('Binarize feature matrix? ([{}]es, [n]o, type q! to quit): '.format('\033[4m\033[1my\033[0m'));
+        if _in == 'q!':
+            raise KeyboardInterrupt();
+        if not _in.strip() or _in.strip().lower() == 'y':
+            _mat = tm.binarize_sparse_matrix(_mat);
+
         _mat_train = _mat[_train_idxes,:];
         _train_labels = true_labels[_train_idxes];
         _mat_test = _mat[_test_idxes,:];
@@ -154,7 +161,6 @@ try:
         predicted_test_labels, model = tc.clazzify(_mat_train, _mat_test, _train_labels);
         sorted_idxs = np.argsort(np.abs(model.coef_[0]))[::-1]; # sort and reverse indices, model.coef_ is just a (1 x n) matrix
         print('Coefficients:\n\t{}\n\t{}'.format(model.intercept_[0], '\n\t'.join(['{:+.3f} {:6d} {}'.format(model.coef_[0][i], i, _colheader[i]) for i in sorted_idxs[:20]])));
-
 
         _in = raw_input('Enter y to predict {} zero-vector(s) with default class (0) (press <Enter> or n to not classify zero-vectors, type q! to quit): '.format(len(_zero_v_idxes)));
         if _in == 'q!':
@@ -171,7 +177,6 @@ try:
             for i in range(coef_samples.shape[0]):
                 sorted_idxs = np.argsort(np.abs(np.array(coef_samples[i])))[::-1]; # sort and reverse indices, model.coef_ is just a (1 x n) matrix
                 print('Coefficients {} (predicted: {}, real: {}):\n\t{}'.format(_d_triples.get_triple(_test_idxes[i]), predicted_test_labels[i], _test_labels[i], '\n\t'.join(['{:+.3f} {:6d} {}'.format(coef_samples[i][j], j, _colheader[j]) for j in sorted_idxs[:20]])));
-
 
 except KeyboardInterrupt:
     pass;

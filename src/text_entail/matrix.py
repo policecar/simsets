@@ -50,8 +50,10 @@ def ctxAsfeature(d_triples, d_ctx):
 def binarize_sparse_matrix(mat):
     """
     """
+    logging.info('binarizing feature matrix')
     mat = mat.astype(bool)
     mat = mat.astype(np.float64)
+    logging.info('finished binarizing feature matrix')
     return mat
 
 def pred_vectors_with_context(preds_file, has_header=True):

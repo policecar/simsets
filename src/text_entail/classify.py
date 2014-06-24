@@ -40,9 +40,7 @@ def run_classification_test(mat, true_labels, binarize=True,
     """
     ## binarize full matrix if desired
     if binarize:
-        logging.info('binarizing feature matrix')
         mat = tm.binarize_sparse_matrix(mat)
-        logging.info('finished binarizing feature matrix')
 
     #### create train and test split
     logging.info('preparing train and test set.')
