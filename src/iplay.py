@@ -178,5 +178,22 @@ try:
                 sorted_idxs = np.argsort(np.abs(np.array(coef_samples[i])))[::-1]; # sort and reverse indices, model.coef_ is just a (1 x n) matrix
                 print('Coefficients {} (predicted: {}, real: {}):\n\t{}'.format(_d_triples.get_triple(_test_idxes[i]), predicted_test_labels[i], _test_labels[i], '\n\t'.join(['{:+.3f} {:6d} {}'.format(coef_samples[i][j], j, _colheader[j]) for j in sorted_idxs[:20]])));
 
+        # # show features of misclassified samples
+        # # get indices of misclassified samples
+        # idx_misclassified_samples = np.where( _test_labels != predicted_test_labels )[0]
+        # print( "Number of misclassified data points %d" % ( idx_misclassified_samples.shape[0] ))
+        # # get pair names of misclassified samples
+        # for idx in np.nditer( idx_misclassified_samples ):
+        #     print()
+        #     gidx = _test_idxes[idx]
+        #     print( "%s::@::%s\n" % ( _d_triples.get_triple( gidx )[1], _d_triples.get_triple( gidx )[2] ))
+        #     print( "y_true: %d\t y_pred: %d\n" % ( _test_labels[ idx ], predicted_test_labels[idx] ))
+        #     idx_features = _mat[idx][0,:].nonzero()[1]
+        #     for jdx in np.nditer( idx_features ):
+        #         feat_name = _colheader[jdx].split(']: ')[1]
+        #         print( "%s" % ( feat_name ))
+        #     print()
+
+
 except KeyboardInterrupt:
     pass;
