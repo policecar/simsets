@@ -71,14 +71,16 @@ def pred_vectors_with_context(preds_file, has_header=True):
         ctx = '{}\t{}'.format(ctx_X, ctx_Y)
         i = d_triples.add((ctx, pred_l, pred_r))
         if i < len(temp):
-            label = 1 if entailing.strip().lower() == 'true' else 0
+            # label = 1 if entailing.strip().lower() == 'true' else 0
+            label = entailing.strip()
             print("omitting duplicate example: '{} {} {} {}' ".format(ctx, pred_l, pred_r, entailing) ,file=sys.stderr)
             duplicates += 1
             if temp[i] != label:
                 print("duplicate example has different label: '{}' vs. '{}'".format(temp[i], label) ,file=sys.stderr)
                 contradicting_duplicates += 1
         else:
-            temp.append(1 if entailing.strip().lower() == 'true' else 0)
+            # temp.append(1 if entailing.strip().lower() == 'true' else 0)
+            temp.append( entailing.strip())
     vec = np.array(temp, dtype=np.float64)
     logging.info("finished creating arg pairs class vector '{}'".format(preds_file))
     logging.info("found {} duplicate examples with {} having contradicting labels.".format(duplicates, contradicting_duplicates))
@@ -104,14 +106,16 @@ def arg_l_arg_r_pairs_vector(args_file, file_contains_context=False, has_header=
     for ctx, arg_l, arg_r, entailing in ctx_argl_argr_entail:
         i = d_triples.add((ctx, arg_l, arg_r))
         if i < len(temp):
-            label = 1 if entailing.strip().lower() == 'true' else 0
+            # label = 1 if entailing.strip().lower() == 'true' else 0
+            label = entailing.strip()
             print("omitting duplicate example: '{} {} {} {}' ".format(ctx, arg_l, arg_r, entailing) ,file=sys.stderr)
             duplicates += 1
             if temp[i] != label:
                 print("duplicate example has different label: '{}' vs. '{}'".format(temp[i], label) ,file=sys.stderr)
                 contradicting_duplicates += 1
         else:
-            temp.append(1 if entailing.strip().lower() == 'true' else 0)
+            # temp.append(1 if entailing.strip().lower() == 'true' else 0)
+            temp.append( entailing.strip())
     vec = np.array(temp, dtype=np.float64)
     logging.info("finished creating arg pairs class vector '{}'".format(args_file))
     logging.info("found {} duplicate examples with {} having contradicting labels.".format(duplicates, contradicting_duplicates))
@@ -157,6 +161,7 @@ def arg_l_arg_r_asjo_matrix(
                 mat.resize((mat.shape[0],l+1))
             for k in ks:
                 mat[k,l] = float(s)
+ 
     logging.info("finished creating arg pair feature matrix '{}'".format(jb_file))
     logging.info("saving matrix to '{}'.".format(mm_file))
     with open(mm_file,'w') as f:
