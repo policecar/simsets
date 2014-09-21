@@ -21,7 +21,7 @@ bless | labeled word pairs
 ### Usage
 
 ```python
-python2.7 play_bless.py
+python2.7 iplay.py
 ```
 
 
