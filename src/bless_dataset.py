@@ -3,6 +3,7 @@
 Created on Wed Apr  9 13:44:30 2014
 
 @author: stevo
+@author: priska
 """
 
 from __future__ import print_function;
@@ -15,25 +16,15 @@ import numpy as np;
 
 from config import *
 
-## bless \cap pukwac
-# labels =                basedir + '../bless/bless_wacky_140521_coord.tsv'
-# labels =                basedir + '../bless/bless_wacky_140521_hyper.tsv'
-# labels =                basedir + '../bless/bless_wacky_140521_mero.tsv'
-
-## bless except random
-# labels =                basedir + '../bless/bless_nouns_no_random_coord.tsv'
-# labels =                basedir + '../bless/bless_nouns_no_random_hyper.tsv'
-# labels =                basedir + '../bless/bless_nouns_no_random_mero.tsv'
-
-## bless all nouns
-# labels =                basedir + '../bless/bless_nouns_coord_vs_rest.tsv'
-# labels =                basedir + '../bless/bless_nouns_hyper_vs_rest.tsv'
-# labels =                basedir + '../bless/bless_nouns_mero_vs_rest.tsv'
+## binary
+# labels =                basedir + '../bless/binary/overlap_with_pukwac_coord.tsv'
+# labels =                basedir + '../bless/binary/overlap_with_pukwac_hyper.tsv'
+# labels =                basedir + '../bless/binary/overlap_with_pukwac_mero.tsv'
 
 ## multiclass
-labels =                basedir + '../bless/bless_wacky_140521_4classes.tsv'
-# labels =                basedir + '../bless/bless_nouns_no_random_3classes.tsv'
-# labels =                basedir + '../bless/bless_nouns_4classes.tsv'
+# labels =                basedir + '../bless/multiclass/nouns_coord_hyper_mero_rand.tsv'
+# labels =                basedir + '../bless/multiclass/nouns_coord_hyper_mero.tsv'
+labels =                basedir + '../bless/multiclass/overlap_with_pukwac_coord_hyper_mero_rand.tsv'
 
 svo_counts =            basedir + 'ctx/ctx_lmi.gz';
 svo_flipped_counts =    basedir + 'ctx/ctx_lmi_flipped.gz';
