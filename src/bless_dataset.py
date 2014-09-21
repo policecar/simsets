@@ -13,8 +13,7 @@ import text_entail.dictionary as td;
 import scipy.sparse as sparse;
 import numpy as np;
 
-basedir =               '~/data/tehsis/simsets/finalv/'
-# basedir =               '~/data/tehsis/simsets/news120m/'
+from config import *
 
 ## bless \cap pukwac
 # labels =                basedir + '../bless/bless_wacky_140521_coord.tsv'
