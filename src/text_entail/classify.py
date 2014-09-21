@@ -256,7 +256,7 @@ def clazzify(train_mat, test_mat, true_train_labels):
     """
     # learn
     logging.info('learning...')
-    model = LogisticRegression(random_state=17, penalty='l1')
+    model = LogisticRegression(random_state=17, penalty='l1') # C=1.0
     model.fit(train_mat, true_train_labels)
     logging.info('finished learning.')
 
@@ -327,17 +327,30 @@ def classify(train_mat, test_mat, true_train_labels, true_test_labels,
 def calculate_statistics(true_test_labels, predicted_test_labels):
     """
     """
-    conf_matrix = metrics.confusion_matrix(true_test_labels, predicted_test_labels, labels=[1,0])
+    # conf_matrix = metrics.confusion_matrix(true_test_labels, predicted_test_labels, labels=[1,0])
+    conf_matrix = metrics.confusion_matrix(true_test_labels, predicted_test_labels)
     accuracy = metrics.accuracy_score(true_test_labels, predicted_test_labels)
-    avg_precision = metrics.average_precision_score( true_test_labels, predicted_test_labels )
 
     print('======')
     print()
-    print('   TP: {}\n   FP: {}\n   FN: {}\n   TN: {}\n'.format(conf_matrix[0,0],
-        conf_matrix[1,0], conf_matrix[0,1], conf_matrix[1,1]))
+    
+    if len(np.unique(true_test_labels)) == 2:
+        avg_precision = metrics.average_precision_score( true_test_labels, predicted_test_labels )
+        print('   TP: {}\n   FP: {}\n   FN: {}\n   TN: {}\n'.format(conf_matrix[0,0],
+            conf_matrix[1,0], conf_matrix[0,1], conf_matrix[1,1]))
+        print('   AP: {}'.format(avg_precision))
+    else:
+        print( conf_matrix )
+        print()
+        # normalize confusion matrix
+        cfmat = conf_matrix.astype( float )   # convert values to floats
+        cfmat / cfmat.sum( axis=1 )[:,None]
+        print( cfmat )
+        print()
+    
     print('  Acc: {}'.format(accuracy))
-    print('   AP: {}'.format(avg_precision))
     print()
+
     # print('  Pr(1): {}\n  Re(1): {}\n  F1(1): {}\n'.format(prec_1, rec_1, f1_1))
     # print('  Pr(0): {}\n  Re(0): {}\n  F1(0): {}\n'.format(prec_0, rec_0, f1_0))
     # print('  Pr_w(0.5): {}\n  Re_w(0.5): {}\n  F1_w(0.5): {}\n'.format(prec, rec, f1))
@@ -347,3 +360,4 @@ def calculate_statistics(true_test_labels, predicted_test_labels):
     report = metrics.classification_report( true_test_labels, predicted_test_labels )
     print( report )
     print('======')
+
